@@ -26,7 +26,7 @@ class UserAccountManager(BaseUserManager):
 
         return user
 
-class UserAccount(AbstractBaseUser, PermissionsMixin):
+class User(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     user_name = models.CharField(max_length=100, unique=True, null=True)
@@ -44,3 +44,26 @@ class UserAccount(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self) -> str:
         return self.phone_number
+
+class GifterManager(BaseUserManager):
+    def get_queryset(self) -> models.QuerySet:
+        return super().get_queryset().filter(is_gifter=True)
+
+class TakerManager(BaseUserManager):
+    def get_queryset(self) -> models.QuerySet:
+        return super().get_queryset().filter(is_taker=True)
+
+class Gifter(User):
+    objects = GifterManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = "Gifter"
+
+class Taker(User):
+    objects = TakerManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = "Taker"
+
