@@ -74,3 +74,13 @@ class Taker(User):
         proxy = True
         verbose_name = "Taker"
 
+class Question(models.Model):
+    gifter = models.ForeignKey('Gifter', on_delete=models.CASCADE)
+    answer_format = models.TextField(blank=True, null=True)
+    correct_answer = models.TextField(blank=True, null=True)
+    question_code = models.IntegerField(unique=True)
+
+    def __str__(self) -> str:
+        return str(self.question_code)
+
+
