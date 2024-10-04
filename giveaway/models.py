@@ -83,4 +83,10 @@ class Question(models.Model):
     def __str__(self) -> str:
         return str(self.question_code)
 
+class Answer(models.Model):
+    taker = models.ForeignKey(Taker, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    answer = models.TextField(blank=True, null=True)
 
+    def __str__(self) -> str:
+        return self.answer
