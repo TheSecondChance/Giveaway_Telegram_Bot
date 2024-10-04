@@ -37,6 +37,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     phone_number = models.CharField(validators=[PHONE_REGEX], max_length=13, unique=True)
     telegram_id = models.IntegerField(unique=True, null=True)
     date_joined = models.DateTimeField(auto_now_add=True)
+    language = models.CharField(max_length=100, default="english")
 
     is_taker = models.BooleanField(default=False)
     is_gifter = models.BooleanField(default=False)
