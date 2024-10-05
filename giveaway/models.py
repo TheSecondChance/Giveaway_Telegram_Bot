@@ -4,11 +4,6 @@ from django.contrib.auth.models import (
     BaseUserManager, AbstractBaseUser, PermissionsMixin)
 
 
-PHONE_REGEX = RegexValidator(
-        regex=r'^\+251(7|9)\d{8}$', 
-        message="Phone number must be in the format '+2517XXXXXXXX' or '+2519XXXXXXXX'. Up to 12 digits allowed."
-    )
-
 class UserAccountManager(BaseUserManager):
     def create_user(self, phone_number, password=None, **kwargs):
         if not phone_number:
@@ -31,11 +26,11 @@ class UserAccountManager(BaseUserManager):
         return self.create_user(phone_number, password=password, **extra_fields)
 
 class User(AbstractBaseUser, PermissionsMixin):
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    user_name = models.CharField(max_length=100, unique=True, null=True)
-    phone_number = models.CharField(validators=[PHONE_REGEX], max_length=13, unique=True)
-    telegram_id = models.IntegerField(unique=True, null=True)
+    first_name = models.CharField(max_length=100, null=True)
+    last_name = models.CharField(max_length=100, null=True)
+    user_name = models.CharField(max_length=100, null=True)
+    phone_number = models.CharField(max_length=15, unique=True)
+    telegram_id = models.IntegerField(unique=True)
     date_joined = models.DateTimeField(auto_now_add=True)
     language = models.CharField(max_length=100, default="english")
 
@@ -51,7 +46,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = ['first_name',]
 
     def __str__(self) -> str:
-        return self.phone_number
+        return str(self.phone_number)
 
 class GifterManager(BaseUserManager):
     def get_queryset(self) -> models.QuerySet:
