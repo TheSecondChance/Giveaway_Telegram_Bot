@@ -28,8 +28,8 @@ class UserAccountManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=100, null=True)
     last_name = models.CharField(max_length=100, null=True)
-    user_name = models.CharField(max_length=100, null=True)
-    phone_number = models.CharField(max_length=15, unique=True)
+    user_name = models.CharField(max_length=100, unique=True, null=True, blank=True)
+    phone_number = models.CharField(max_length=15, unique=True, null=True, blank=True)
     telegram_id = models.IntegerField(unique=True)
     date_joined = models.DateTimeField(auto_now_add=True)
     language = models.CharField(max_length=100, default="english")
