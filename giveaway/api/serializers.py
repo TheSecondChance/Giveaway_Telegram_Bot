@@ -21,4 +21,6 @@ class QuestionSerializer(ModelSerializer):
     class Meta:
         model = Question
         fields = ['gifter', 'answer_format', 'correct_answer', 'question_code']
-
+        extra_kwargs = {
+            'question_code': {'required': False} 
+        }
