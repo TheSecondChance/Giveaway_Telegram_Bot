@@ -40,14 +40,12 @@ def handle_language_selection(call: types.CallbackQuery):
     else:
         data = {
             "telegram_id": user.id,
-            "is_taker": "false",
-            "is_gifter": "false",
             "user_name": user.username,
             "language": call.data
         }
         create_user(created_data=data)
         response_user = get_user(telegram_id=user.id)
-        language = response_user.get('language')
+        language = call.data
 
     msg = bot.send_message(call.message.chat.id, text=(
         f"Language Selected Successfully set {language}✅", language),)
@@ -65,7 +63,7 @@ def handle_language_selection(call: types.CallbackQuery):
     if is_not_phone_exisit == None:
         request_contact_share(msg)
     else:
-        welcome(msg)
+        start(msg)
 
 def request_contact_share(message):
     keyboard = types.ReplyKeyboardMarkup(
@@ -108,7 +106,9 @@ def handle_shared_contact(message: types.Message):
         chat_id=message.chat.id,
         text=("Contact Received ✅")
     )
-    threading.Thread(target=delete_message_after_delay, args=(message.chat.id, response_message.message_id, 1)).start()
+    threading.Thread(target=delete_message_after_delay, args=(
+        message.chat.id, response_message.message_id, 1)).start()
+    
     start(message)
 
 @bot.message_handler(commands=['start', 'restart']) 
@@ -116,8 +116,16 @@ def start(message):
     user = get_user(telegram_id=message.from_user.id)
     if user != None:
         is_phone_exisit = user.get('phone_number')
-        if is_phone_exisit is not None:
-            welcome(message)
+        is_giver = user.get('is_gifter')
+        is_taker = user.get('is_taker')
+        if is_giver == True:
+            Giver_welcome(message)
+        elif is_taker == True:
+            taker_welcome(message) 
+        elif is_phone_exisit is not None:
+            chose_role(message)
+        else:
+            select_language(message)
     else:
         select_language(message)
         try:
@@ -125,14 +133,33 @@ def start(message):
         except telebot.apihelper.ApiTelegramException as e:
             print(f"This is Failed start to delete message {message.message_id}: {e}")
 
-@bot.message_handler(commands=['welcome']) 
-def welcome(message, userId=None):
+def chose_role(message):
+
     user = get_user(telegram_id=message.from_user.id)
     inline_markup = types.InlineKeyboardMarkup(row_width=2)
     language = user.get('language', None)
-    welcome_msg = _(start_msg, language)
-    btn1 = types.InlineKeyboardButton(_("Giveter 🎁", language), callback_data="giveter")
+    welcome_msg = _(choose_role, language)
+    btn1 = types.InlineKeyboardButton(_("Giver 🎁", language), callback_data="giver")
     btn2 = types.InlineKeyboardButton(_("Taker 😉", language), callback_data="taker")
+    inline_markup.row(btn1, btn2)
+
+    with open('./Assets/languages.png', 'rb') as photo:
+        bot.send_photo(message.chat.id, photo, caption=welcome_msg, reply_markup=inline_markup)
+    try:
+        bot.delete_message(message.chat.id, message.message_id)
+    except telebot.apihelper.ApiTelegramException as e:
+        print(f"Failed chose to delete message {message.message_id}: {e}")
+
+def Giver_welcome(message, userId=None):
+    if userId:
+        user = get_user(telegram_id=userId)
+    else:
+        user = get_user(telegram_id=message.from_user.id)
+    inline_markup = types.InlineKeyboardMarkup(row_width=2)
+    language = user.get('language', None)
+    welcome_msg = _(start_msg, language)
+    btn1 = types.InlineKeyboardButton(_("Question Code 🧑‍💻", language), callback_data="question_code")
+    btn2 = types.InlineKeyboardButton(_("Result 🧧", language), callback_data="taker")
     btn3 = types.InlineKeyboardButton(_("Settings ⚙️", language), callback_data="settings")
     btn4 = types.InlineKeyboardButton(_("Invite Friends 🤝", language), url=INVITE_LINK)
     inline_markup.row(btn1, btn2)
@@ -144,18 +171,49 @@ def welcome(message, userId=None):
         bot.delete_message(message.chat.id, message.message_id)
     except telebot.apihelper.ApiTelegramException as e:
         print(f"Failed welcome to delete message {message.message_id}: {e}")
+
+def taker_welcome(message, userId=None):
+    if userId:
+        user = get_user(telegram_id=userId)
+    else:
+        user = get_user(telegram_id=message.from_user.id)
+    inline_markup = types.InlineKeyboardMarkup(row_width=2)
+    language = user.get('language', None)
+    welcome_msg = _(start_msg, language)
+    btn1 = types.InlineKeyboardButton(_("Answer ⭐", language), callback_data="answer")
+    btn2 = types.InlineKeyboardButton(_("Settings ⚙️", language), callback_data="settings")
+    btn3 = types.InlineKeyboardButton(_("Invite Friends 🤝", language), url=INVITE_LINK)
+    inline_markup.row(btn1, btn2)
+    inline_markup.row(btn3)
+
+    with open('./Assets/welcome_dr.png', 'rb') as photo:
+        bot.send_photo(message.chat.id, photo, caption=welcome_msg, reply_markup=inline_markup)
+    try:
+        bot.delete_message(message.chat.id, message.message_id)
+    except telebot.apihelper.ApiTelegramException as e:
+        print(f"Failed welcome to delete message {message.message_id}: {e}")
    
 @bot.callback_query_handler(func=lambda call: True)
 def handle_call_back(callback):
     command = callback.data
-    if command == "gifter":
-        bot.delete_message(callback.message.chat.id, callback.message.id)
-        bot.send_message(callback.message.chat.id, f'hellow {command.capitalize()}')
-        bot.send_message(callback.message.chat.id, f'Your set to {command.capitalize()}')
+    telegram_id=callback.message.chat.id
+
+    if command == "giver":
+        data = {
+            "is_gifter": True,
+            "is_taker": False,
+        }
+
+        update_user(telegram_id=telegram_id, updated_data=data)
+        Giver_welcome(callback.message, userId=telegram_id)
+
     if command == "taker":
-        """save gifter is_taker=True"""
-        bot.delete_message(callback.message.chat.id, callback.message.id)
-        bot.send_message(callback.message.chat.id, f'Your set to {command.capitalize()}')
+        data = {
+            "is_gifter": False,
+            "is_taker": True,
+        }
+        update_user(telegram_id=telegram_id, updated_data=data)
+        taker_welcome(callback.message, userId=telegram_id)
     
 bot.remove_webhook()
 bot.infinity_polling()
