@@ -81,7 +81,7 @@ class Question(models.Model):
 
 class Answer(models.Model):
     taker = models.ForeignKey(Taker, on_delete=models.CASCADE)
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    question_code = models.ForeignKey(Question, on_delete=models.CASCADE)
     answer = models.TextField(blank=True, null=True)
 
     def __str__(self) -> str:

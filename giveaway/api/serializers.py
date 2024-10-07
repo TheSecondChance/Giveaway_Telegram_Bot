@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer, BooleanField
 from rest_framework import serializers
-from giveaway.models import User, Question
+from giveaway.models import User, Question, Answer
 
 
 class UserSerializer(ModelSerializer):
@@ -24,3 +24,8 @@ class QuestionSerializer(ModelSerializer):
         extra_kwargs = {
             'question_code': {'required': False} 
         }
+
+class AnswerSerializer(ModelSerializer):
+    class Meta:
+        model = Answer
+        fields = ['taker', 'question_code', 'answer']
