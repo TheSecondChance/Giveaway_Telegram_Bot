@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer, BooleanField
 from rest_framework import serializers
-from giveaway.models import User
+from giveaway.models import User, Question
 
 
 class UserSerializer(ModelSerializer):
@@ -17,4 +17,8 @@ class UserTelegramIdSerializer(ModelSerializer):
         fields = ['first_name', 'last_name', 'user_name', 'phone_number',
                   'telegram_id', 'language', 'is_taker', 'is_gifter', 'is_active']
 
-    
+class QuestionSerializer(ModelSerializer):
+    class Meta:
+        model = Question
+        fields = ['gifter', 'answer_format', 'correct_answer', 'question_code']
+
