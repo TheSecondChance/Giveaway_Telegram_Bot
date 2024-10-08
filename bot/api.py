@@ -81,3 +81,53 @@ def update_user(telegram_id: int, updated_data: dict) -> Optional[Dict[str, Any]
                         status=status.HTTP_400_BAD_REQUEST)
     else:
         return Response({"detail": "something wrong"},  response.status_code)
+
+def create_question(telegram_id: int, created_data: dict) -> Optional[Dict[str, Any]]:
+    """Create a new question by sending a POST request.
+
+    Args:
+        telegram_id (int): The user's Telegram ID.
+        created_data (dict): A dictionary containing the question data to create.
+
+    Returns:
+        Optional[Dict[str, Any]]: The created question data if the request is successful,
+        or an error message if something goes wrong.
+    """
+    endpoint = 'api/create-question/'
+    params = {
+        'telegram_id': telegram_id
+    }
+
+    response = requests.post(BASE_URL + endpoint, params=params, json=created_data)
+
+    if response.status_code == 201:
+        return response.json()
+    else:
+        print(f"Something went wrong in create question: {response.status_code} - {response.text}")
+        return None
+
+def create_answer(telegram_id: int, created_data: dict) -> Optional[Dict[str, Any]]:
+    """Create a new answer by sending a POST request.
+
+    Args:
+        telegram_id (int): The user's Telegram ID.
+        created_data (dict): A dictionary containing the answer data to create.
+
+    Returns:
+        Optional[Dict[str, Any]]: The created answer data if the request is successful,
+        or an error message if something goes wrong.
+    """
+    endpoint = 'api/answer/'
+    params = {
+        'telegram_id': telegram_id,
+    }
+
+    response = requests.post(BASE_URL + endpoint, params=params, json=created_data)
+
+    if response.status_code == 201:
+        return response.json()
+    elif response.status_code == 404:
+        return {"detail": "No question found with the provided question_code", "status": 404}
+    else:
+        print(f"Something went wrong in create answer: {response.status_code} - {response.text}")
+        return None
