@@ -1,7 +1,8 @@
 import os
+import re
 import time
 import telebot
-from api import get_user, create_user, update_user
+from api import get_user, create_user, update_user, create_question, create_answer
 import threading
 from telebot import types
 from dotenv import load_dotenv
@@ -15,7 +16,7 @@ INVITE_LINK = "https://t.me/GiveawayChallenge_bot?start={}"
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 bot = telebot.TeleBot(BOT_TOKEN)
 
-@bot.message_handler(commands=["language", ("language", "amharic")])
+# @bot.message_handler(commands=["language", ("language", "amharic")])
 def select_language(message):
     markup = types.InlineKeyboardMarkup(row_width=2)
     btn1 = types.InlineKeyboardButton("English", callback_data="english")
@@ -192,7 +193,7 @@ def taker_welcome(message, userId=None):
         bot.delete_message(message.chat.id, message.message_id)
     except telebot.apihelper.ApiTelegramException as e:
         print(f"Failed welcome to delete message {message.message_id}: {e}")
-   
+    
 @bot.callback_query_handler(func=lambda call: True)
 def handle_call_back(callback):
     command = callback.data
@@ -214,6 +215,115 @@ def handle_call_back(callback):
         }
         update_user(telegram_id=telegram_id, updated_data=data)
         taker_welcome(callback.message, userId=telegram_id)
+
+    if command == "question_code":
+        question_answer_time(callback.message, userId=telegram_id)
+
+    if command == "now":
+        telegram_id = callback.from_user.id
+        bot.send_message(callback.message.chat.id,
+                         "you can now send your answer" )
+        bot.register_next_step_handler(
+            callback.message, handle_question_answer, telegram_id=telegram_id)
+    if command == "home":
+        Giver_welcome(callback.message, userId=telegram_id)
+    if command == "taker_home":
+        taker_welcome(callback.message, userId=telegram_id)
+    if command == "after":
+        user = get_user(telegram_id=telegram_id)
+        data = {}
+        response = create_question(telegram_id=telegram_id, created_data=data)
+        question_code = response.get('question_code')
+        inline_markup = types.InlineKeyboardMarkup(row_width=2)
+        language = user.get('language', None)
+        copy_code = f"`{question_code}`"
+        welcome_msg = f"Please past this code on you question details 👇\n\n {copy_code}"
+        btn1 = types.InlineKeyboardButton(_("Home 🏠", language), callback_data="home")
+        btn2 = types.InlineKeyboardButton(_("Back 🔙", language), callback_data="back")
+        inline_markup.row(btn1, btn2)
+
+        bot.send_message(callback.message.chat.id, text=welcome_msg, reply_markup=inline_markup, parse_mode="Markdown")
+        try:
+            bot.delete_message(callback.message.chat.id, callback.message.message_id)
+        except telebot.apihelper.ApiTelegramException as e:
+            print(f"Failed welcome to delete message {callback.message.message_id}: {e}")
+    if command == "answer":
+        telegram_id = callback.from_user.id
+        bot.send_message(callback.message.chat.id,
+                         "you can now send your answer" )
+        bot.register_next_step_handler(
+            callback.message, handle_answer, telegram_id=telegram_id)
+
+def handle_answer(message, telegram_id):
+    user = get_user(telegram_id=telegram_id)
+    telegram_id = message.from_user.id
+    message_text = message.text.strip()
+    match = re.match(r"(\d+)\s+(.*)", message_text)
+
+    if match:
+        question_code = match.group(1)
+        answer = match.group(2)
+    else:
+        question_code = None
+        answer = message_text
+    data = {
+        'answer': answer,
+        'question_code': question_code
+    }
+    response = create_answer(telegram_id=telegram_id, created_data=data)
+    if response.get('status') == 201:
+        welcome_msg = f"Answer Received ✅"
     
+    elif response.get('status') == 404:
+        welcome_msg = f"Answer not Received ❌ \n\n Resone: There is no question code"
+    else:
+        welcome_msg = f"Answer not Received ❌ \n\n Resone: you can answer only once"
+    inline_markup = types.InlineKeyboardMarkup(row_width=2)
+    language = user.get('language', None)
+    btn1 = types.InlineKeyboardButton(_("Home 🏠", language), callback_data="taker_home")
+    btn2 = types.InlineKeyboardButton(_("Back 🔙", language), callback_data="back")
+    inline_markup.row(btn1, btn2)
+    bot.send_message(message.chat.id, text=welcome_msg, reply_markup=inline_markup)
+
+def handle_question_answer(message, telegram_id):
+    user = get_user(telegram_id=telegram_id)
+    answer = message.text
+    telegram_id = message.from_user.id
+    data = {
+        'correct_answer': answer,
+    }
+    response = create_question(telegram_id=telegram_id, created_data=data)
+    question_code = response.get('question_code')
+    inline_markup = types.InlineKeyboardMarkup(row_width=2)
+    language = user.get('language', None)
+    copy_code = f"`{question_code}`"
+    welcome_msg = f"Answer Received ✅ \n\nPlease past this code on you question details 👇\n\n {copy_code} "
+    btn1 = types.InlineKeyboardButton(_("Home 🏠", language), callback_data="home")
+    btn2 = types.InlineKeyboardButton(_("Back 🔙", language), callback_data="back")
+    inline_markup.row(btn1, btn2)
+
+    with open('./Assets/welcome_dr.png', 'rb') as photo:
+        bot.send_photo(message.chat.id, photo, caption=welcome_msg, reply_markup=inline_markup, parse_mode="Markdown")
+    try:
+        bot.delete_message(message.chat.id, message.message_id)
+    except telebot.apihelper.ApiTelegramException as e:
+        print(f"Failed welcome to delete message {message.message_id}: {e}")
+
+def question_answer_time(message, userId=None):
+    user = get_user(telegram_id=userId)
+    inline_markup = types.InlineKeyboardMarkup(row_width=2)
+    language = user.get('language', None)
+    welcome_msg = _(start_msg, language)
+    btn1 = types.InlineKeyboardButton(_("I know answer now 🚀", language), callback_data="now")
+    btn2 = types.InlineKeyboardButton(_("After taker submite 😉", language), callback_data="after")
+    inline_markup.row(btn1, btn2)
+
+    with open('./Assets/welcome_dr.png', 'rb') as photo:
+        bot.send_photo(message.chat.id, photo, caption=welcome_msg, reply_markup=inline_markup)
+    try:
+        bot.delete_message(message.chat.id, message.message_id)
+    except telebot.apihelper.ApiTelegramException as e:
+        print(f"Failed welcome to delete message {message.message_id}: {e}")
+
 bot.remove_webhook()
 bot.infinity_polling()
