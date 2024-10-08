@@ -94,34 +94,34 @@ class AnswerViewSet(CreateModelMixin, GenericViewSet):
 
     def create(self, request, *args, **kwargs):
         telegram_id = request.query_params.get('telegram_id')
-        question_code = request.query_params.get('question_code')
+        question_code = request.data.get('question_code')
+
         if not telegram_id:
             return Response({"detail": "telegram_id query param is required"},
                             status=status.HTTP_400_BAD_REQUEST)
         if not question_code:
-            return Response({"detail": "question_code query param is required"},
+            return Response({"detail": "question_code is required in the body"},
                             status=status.HTTP_400_BAD_REQUEST)
         taker = Taker.objects.filter(telegram_id=telegram_id).first()
         if not taker:
             return Response({"detail": "No taker found with the provided telegram_id"},
                             status=status.HTTP_404_NOT_FOUND)
-        
         question = Question.objects.filter(pk=question_code).first()
         if not question:
             return Response({"detail": "No question found with the provided question_code"},
                             status=status.HTTP_404_NOT_FOUND)
-        existing_answer = Answer.objects.filter(taker=taker, question_code=question).first()
+        existing_answer = Answer.objects.filter(taker=taker, question_code=question_code).first()
         if existing_answer:
             return Response({"detail": "Taker has already applied to this question."},
                             status=status.HTTP_400_BAD_REQUEST)
         data = request.data.copy()
         data['taker'] = taker.pk
-        data['question_code'] = question.pk
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
 
 
 
