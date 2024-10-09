@@ -95,35 +95,40 @@ class AnswerViewSet(CreateModelMixin, GenericViewSet):
     def create(self, request, *args, **kwargs):
         telegram_id = request.query_params.get('telegram_id')
         question_code = request.data.get('question_code')
-
+        answer_text = request.data.get('answer_text')
+        
         if not telegram_id:
-            return Response({"detail": "telegram_id query param is required"},
+            return Response({"status": 400, "detail": "telegram_id query param is required"},
                             status=status.HTTP_400_BAD_REQUEST)
         if not question_code:
-            return Response({"detail": "question_code is required in the body"},
+            return Response({"status": 400, "detail": "question_code is required in the body"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        if not answer_text:
+            return Response({"status": 400, "detail": "answer_text is required in the body"},
                             status=status.HTTP_400_BAD_REQUEST)
         taker = Taker.objects.filter(telegram_id=telegram_id).first()
         if not taker:
-            return Response({"detail": "No taker found with the provided telegram_id"},
+            return Response({"status": 404, "detail": "No taker found with the provided telegram_id"},
                             status=status.HTTP_404_NOT_FOUND)
         question = Question.objects.filter(pk=question_code).first()
         if not question:
-            return Response({"detail": "No question found with the provided question_code"},
+            return Response({"status": 404, "detail": "No question found with the provided question_code"},
                             status=status.HTTP_404_NOT_FOUND)
         existing_answer = Answer.objects.filter(taker=taker, question_code=question_code).first()
         if existing_answer:
-            return Response({"detail": "Taker has already applied to this question."},
+            return Response({"status": 400, "detail": "Taker has already answered this question."},
                             status=status.HTTP_400_BAD_REQUEST)
+        is_correct = False
+        if question.correct_answer and answer_text:
+            is_correct = (answer_text.strip().lower() == question.correct_answer.strip().lower())
         data = request.data.copy()
         data['taker'] = taker.pk
+        data['is_correct'] = is_correct
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
-
-
+        return Response({"status": 201, "data": serializer.data, "detail": "Answer successfully created"},
+                        status=status.HTTP_201_CREATED)
 
 # TELEGRAM_BOT_WEBHOOK_URL = "https://bcd68b0417f6aeef18b0fe38d16faa40.serveo.net/account/web-hook"
 
