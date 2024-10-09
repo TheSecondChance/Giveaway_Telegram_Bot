@@ -82,7 +82,8 @@ class Question(models.Model):
 class Answer(models.Model):
     taker = models.ForeignKey(Taker, on_delete=models.CASCADE)
     question_code = models.ForeignKey(Question, on_delete=models.CASCADE)
-    answer = models.TextField(blank=True, null=True)
+    answer_text = models.TextField(blank=True, null=True)
+    is_correct = models.BooleanField(default=False)
 
     def __str__(self) -> str:
-        return self.answer
+        return f"by {self.taker} to {self.question_code}"
