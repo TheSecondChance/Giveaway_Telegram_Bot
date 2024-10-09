@@ -252,9 +252,9 @@ def handle_call_back(callback):
         bot.send_message(callback.message.chat.id,
                          "you can now send your answer" )
         bot.register_next_step_handler(
-            callback.message, handle_answer, telegram_id=telegram_id)
+            callback.message, handle_taker_answer, telegram_id=telegram_id)
 
-def handle_answer(message, telegram_id):
+def handle_taker_answer(message, telegram_id):
     user = get_user(telegram_id=telegram_id)
     telegram_id = message.from_user.id
     message_text = message.text.strip()
@@ -267,13 +267,12 @@ def handle_answer(message, telegram_id):
         question_code = None
         answer = message_text
     data = {
-        'answer': answer,
+        'answer_text': answer,
         'question_code': question_code
     }
     response = create_answer(telegram_id=telegram_id, created_data=data)
     if response.get('status') == 201:
         welcome_msg = f"Answer Received ✅"
-    
     elif response.get('status') == 404:
         welcome_msg = f"Answer not Received ❌ \n\n Resone: There is no question code"
     else:
