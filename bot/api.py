@@ -131,3 +131,21 @@ def create_answer(telegram_id: int, created_data: dict) -> Optional[Dict[str, An
     else:
         print(f"Something went wrong in create answer: {response.status_code} - {response.text}")
         return None
+
+def giver_result(telegram_id: int, question_code: int) -> Optional[Dict[str, Any]]:
+    """_summary_
+
+    Args:
+        telegram_id (int): The giver Telegram ID.
+        question_code (int): question pk
+
+    Returns:
+        Optional[Dict[str, Any]]: The result data if the request is successful,
+    """
+    endpoint = 'api/result'
+    params = {
+        'telegram_id': telegram_id,
+        'question_code': question_code
+    }
+    response = requests.get(BASE_URL + endpoint, params=params)
+    return response
