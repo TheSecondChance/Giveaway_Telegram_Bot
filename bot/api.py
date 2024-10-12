@@ -1,8 +1,11 @@
+import logging
 import requests
 from rest_framework import status
 from rest_framework.response import Response
 from typing import Optional, Dict, Any
 
+
+logging.basicConfig(filename='bot.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 BASE_URL = 'http://127.0.0.1:8000/'
 
 def status(status):
@@ -149,3 +152,24 @@ def giver_result(telegram_id: int, question_code: int) -> Optional[Dict[str, Any
     }
     response = requests.get(BASE_URL + endpoint, params=params)
     return response
+
+def user_exists(user_id: int, bot_send) -> bool:
+    """Check if a user exists on the Telegram server.
+
+    Args:
+        user_id (int): The user ID to check for existence.
+        bot_send: The bot instance to send chat actions.
+
+    Returns:
+        bool: True if the user exists, False otherwise.
+    """
+    try:
+        bot_send.send_chat_action(user_id, "typing")
+        return True
+    except Exception as e:
+        error_message = str(e).lower()
+        if "chat not found" in error_message:
+            logging.warning(f"User {user_id} not found or hasn't interacted with the bot.")
+        else:
+            logging.error(f"Unexpected error for user {user_id}: {e}")
+        return False
