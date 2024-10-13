@@ -1,6 +1,7 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
-from .views import hook, UserCreateViewSet, UserTelegramIdViewSet, QuestionViewSet, AnswerViewSet
+from .views import (hook, UserCreateViewSet, UserTelegramIdViewSet,
+                    QuestionViewSet, AnswerViewSet, ResultGiverViewSet)
 
 
 router = DefaultRouter()
@@ -12,6 +13,7 @@ router.register(r'answer', AnswerViewSet, basename="answer-for-taker")
 urlpatterns = [
     path("web-hook", hook, name="web-hook"),
     path("get-telegram-id/", UserTelegramIdViewSet.as_view(), name="get-by-tg-id"),
+    path("result/", ResultGiverViewSet.as_view(), name="result-for-giver"),
 ]
 
 urlpatterns += router.urls
