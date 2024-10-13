@@ -1,8 +1,10 @@
 import os
+import io
 import re
 import time
 import telebot
-from api import get_user, create_user, update_user, create_question, create_answer
+from api import (get_user, create_user, update_user, create_question,
+                 create_answer, giver_result, user_exists)
 import threading
 from telebot import types
 from dotenv import load_dotenv
@@ -160,7 +162,7 @@ def Giver_welcome(message, userId=None):
     language = user.get('language', None)
     welcome_msg = _(start_msg, language)
     btn1 = types.InlineKeyboardButton(_("Question Code 🧑‍💻", language), callback_data="question_code")
-    btn2 = types.InlineKeyboardButton(_("Result 🧧", language), callback_data="taker")
+    btn2 = types.InlineKeyboardButton(_("Result 🧧", language), callback_data="result_giver")
     btn3 = types.InlineKeyboardButton(_("Settings ⚙️", language), callback_data="settings")
     btn4 = types.InlineKeyboardButton(_("Invite Friends 🤝", language), url=INVITE_LINK)
     inline_markup.row(btn1, btn2)
@@ -229,6 +231,14 @@ def handle_call_back(callback):
         Giver_welcome(callback.message, userId=telegram_id)
     if command == "taker_home":
         taker_welcome(callback.message, userId=telegram_id)
+        
+    if command == "result_giver":
+        telegram_id = callback.from_user.id
+        bot.send_message(callback.message.chat.id,
+                         "you can now send question code" )
+        bot.register_next_step_handler(
+            callback.message, handle_giver_result, telegram_id=telegram_id)
+        
     if command == "after":
         user = get_user(telegram_id=telegram_id)
         data = {}
@@ -303,6 +313,50 @@ def handle_question_answer(message, telegram_id):
 
     with open('./Assets/welcome_dr.png', 'rb') as photo:
         bot.send_photo(message.chat.id, photo, caption=welcome_msg, reply_markup=inline_markup, parse_mode="Markdown")
+    try:
+        bot.delete_message(message.chat.id, message.message_id)
+    except telebot.apihelper.ApiTelegramException as e:
+        print(f"Failed welcome to delete message {message.message_id}: {e}")
+
+def handle_giver_result(message, telegram_id):
+    user = get_user(telegram_id=telegram_id)
+    question_code = message.text
+    telegram_id = message.from_user.id
+    response = giver_result(telegram_id=telegram_id, question_code=question_code)
+    language = user.get('language', None)
+    if response.headers.get('Content-Type') == 'application/pdf':
+        pdf_file = io.BytesIO(response.content)
+        pdf_file.seek(0) 
+        bot.send_document(chat_id=6296919002, document=pdf_file,
+        visible_file_name='correct_answers.pdf',
+        caption=f"Here are the correct answers for question {question_code} in PDF format."
+        )
+    else:
+        response = response.json()
+        correct_answers = response.get('correct_answers', [])
+
+        if not correct_answers:
+            welcome_msg = "There is no correct answer 😢 \n\n"
+        else:
+            inline_markup = types.InlineKeyboardMarkup(row_width=2)
+            valid_users = []
+            for answer in correct_answers:
+                taker_id = answer.get('taker_id')
+                bot_send=bot
+                if user_exists(taker_id, bot_send):
+                    valid_users.append(taker_id)
+            for valid_user in valid_users:
+                button = types.InlineKeyboardButton(text="Click to send a givet 💬", url=f"tg://user?id={valid_user}")
+                inline_markup.add(button)
+
+            btn1 = types.InlineKeyboardButton(_("Home 🏠", language), callback_data="home")
+            btn2 = types.InlineKeyboardButton(_("Back 🔙", language), callback_data="back")
+            inline_markup.row(btn1, btn2)
+
+            bot.send_message(chat_id=6296919002, text=f"Winers of question 👇 \n\n {question_code} 🥇🥇🥇",
+                             reply_markup=inline_markup)
+
+
     try:
         bot.delete_message(message.chat.id, message.message_id)
     except telebot.apihelper.ApiTelegramException as e:
