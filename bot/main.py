@@ -140,8 +140,7 @@ def start(message):
             print(f"This is Failed start to delete message {message.message_id}: {e}")
 
 def chose_role(message):
-
-    user = get_user(telegram_id=message.from_user.id)
+    user = get_user(telegram_id=message.chat.id)
     inline_markup = types.InlineKeyboardMarkup(row_width=2)
     language = user.get('language', None)
     welcome_msg = _(choose_role, language)
@@ -270,6 +269,8 @@ def handle_call_back(callback):
         giver_settings(user=user, message=callback.message, bot=bot)
     if command == "change_lang":
         change_language(callback.message, bot=bot)
+    if command == "change_role":
+        chose_role(callback.message)
 
 def handle_taker_answer(message, telegram_id):
     user = get_user(telegram_id=telegram_id)
