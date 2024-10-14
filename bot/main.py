@@ -165,7 +165,7 @@ def Giver_welcome(message, userId=None):
     welcome_msg = _(start_msg, language)
     btn1 = types.InlineKeyboardButton(_("Question Code 🧑‍💻", language), callback_data="question_code")
     btn2 = types.InlineKeyboardButton(_("Result 🧧", language), callback_data="result_giver")
-    btn3 = types.InlineKeyboardButton(_("Settings ⚙️", language), callback_data="giver_setting")
+    btn3 = types.InlineKeyboardButton(_("Settings ⚙️", language), callback_data="settings")
     btn4 = types.InlineKeyboardButton(_("Invite Friends 🤝", language), url=INVITE_LINK)
     inline_markup.row(btn1, btn2)
     inline_markup.row(btn3, btn4)
@@ -264,7 +264,7 @@ def handle_call_back(callback):
                          "you can now send your answer" )
         bot.register_next_step_handler(
             callback.message, handle_taker_answer, telegram_id=telegram_id)
-    if command == "giver_setting":
+    if command == "settings":
         user = get_user(telegram_id=telegram_id)
         giver_settings(user=user, message=callback.message, bot=bot)
     if command == "change_lang":
