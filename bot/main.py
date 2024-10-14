@@ -117,13 +117,13 @@ def handle_shared_contact(message: types.Message):
 
 @bot.message_handler(commands=['start', 'restart']) 
 def start(message):
-    user = get_user(telegram_id=message.from_user.id)
+    user = get_user(telegram_id=message.chat.id)
     if user != None:
         is_phone_exisit = user.get('phone_number')
         is_giver = user.get('is_gifter')
         is_taker = user.get('is_taker')
         if is_giver == True:
-            Giver_welcome(message)
+            Giver_welcome(message, userId=message.chat.id)
         elif is_taker == True:
             taker_welcome(message) 
         elif is_phone_exisit is not None:
@@ -228,10 +228,9 @@ def handle_call_back(callback):
                          "you can now send your answer" )
         bot.register_next_step_handler(
             callback.message, handle_question_answer, telegram_id=telegram_id)
+        
     if command == "home":
-        Giver_welcome(callback.message, userId=telegram_id)
-    if command == "taker_home":
-        taker_welcome(callback.message, userId=telegram_id)
+        start(callback.message)
         
     if command == "result_giver":
         telegram_id = callback.from_user.id
@@ -312,8 +311,7 @@ def handle_question_answer(message, telegram_id):
     btn2 = types.InlineKeyboardButton(_("Back 🔙", language), callback_data="back")
     inline_markup.row(btn1, btn2)
 
-    with open('./Assets/welcome_dr.png', 'rb') as photo:
-        bot.send_photo(message.chat.id, photo, caption=welcome_msg, reply_markup=inline_markup, parse_mode="Markdown")
+    bot.send_photo(message.chat.id, WELCOME_IMAGE, caption=welcome_msg, reply_markup=inline_markup, parse_mode="Markdown")
     try:
         bot.delete_message(message.chat.id, message.message_id)
     except telebot.apihelper.ApiTelegramException as e:
@@ -323,8 +321,12 @@ def handle_giver_result(message, telegram_id):
     user = get_user(telegram_id=telegram_id)
     question_code = message.text
     telegram_id = message.from_user.id
-    response = giver_result(telegram_id=telegram_id, question_code=question_code)
     language = user.get('language', None)
+    if question_code.isdigit() == False:
+        welcome_msg = "Please enter question code to get result"
+        bot.send_message(message.chat.id, text=welcome_msg)
+        return
+    response = giver_result(telegram_id=telegram_id, question_code=question_code)
     if response.headers.get('Content-Type') == 'application/pdf':
         pdf_file = io.BytesIO(response.content)
         pdf_file.seek(0) 
@@ -334,8 +336,11 @@ def handle_giver_result(message, telegram_id):
         )
     else:
         response = response.json()
+        if response.get('status') == 404:
+            welcome_msg = "No question found with the provided question_code"
+            back_buttons(user, message, welcome_msg)
+            return
         correct_answers = response.get('correct_answers', [])
-
         if not correct_answers:
             welcome_msg = "There is no correct answer 😢 \n\n"
         else:
@@ -368,14 +373,23 @@ def question_answer_time(message, userId=None):
     welcome_msg = _(start_msg, language)
     btn1 = types.InlineKeyboardButton(_("I know answer now 🚀", language), callback_data="now")
     btn2 = types.InlineKeyboardButton(_("After taker submite 😉", language), callback_data="after")
+    btn3 = types.InlineKeyboardButton(_("Back 🔙", language), callback_data="home")
     inline_markup.row(btn1, btn2)
+    inline_markup.row(btn3)
+    bot.send_photo(message.chat.id, WELCOME_IMAGE, caption=welcome_msg, reply_markup=inline_markup)
 
-    with open('./Assets/welcome_dr.png', 'rb') as photo:
-        bot.send_photo(message.chat.id, photo, caption=welcome_msg, reply_markup=inline_markup)
     try:
         bot.delete_message(message.chat.id, message.message_id)
     except telebot.apihelper.ApiTelegramException as e:
         print(f"Failed welcome to delete message {message.message_id}: {e}")
+
+def back_buttons(user, message, welcome_msg):
+    inline_markup = types.InlineKeyboardMarkup(row_width=2)
+    language = user.get('language', None)
+    btn1 = types.InlineKeyboardButton(_("Home 🏠", language), callback_data="home")
+    btn2 = types.InlineKeyboardButton(_("Back 🔙", language), callback_data="home")
+    inline_markup.row(btn1, btn2)
+    bot.send_message(message.chat.id, text=welcome_msg, reply_markup=inline_markup)
 
 bot.remove_webhook()
 bot.infinity_polling()
