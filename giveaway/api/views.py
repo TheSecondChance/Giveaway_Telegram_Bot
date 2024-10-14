@@ -1,8 +1,12 @@
+import io
 import json, telebot
 # from bot.main import bot
+from reportlab.pdfgen import canvas
+from django.http import HttpResponse
+from reportlab.lib.pagesizes import letter
 from django.http.response import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.mixins import CreateModelMixin, UpdateModelMixin
+from rest_framework.mixins import CreateModelMixin, UpdateModelMixin, RetrieveModelMixin
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
@@ -96,7 +100,7 @@ class AnswerViewSet(CreateModelMixin, GenericViewSet):
         telegram_id = request.query_params.get('telegram_id')
         question_code = request.data.get('question_code')
         answer_text = request.data.get('answer_text')
-        
+
         if not telegram_id:
             return Response({"status": 400, "detail": "telegram_id query param is required"},
                             status=status.HTTP_400_BAD_REQUEST)
@@ -129,6 +133,66 @@ class AnswerViewSet(CreateModelMixin, GenericViewSet):
         self.perform_create(serializer)
         return Response({"status": 201, "data": serializer.data, "detail": "Answer successfully created"},
                         status=status.HTTP_201_CREATED)
+
+class ResultGiverViewSet(RetrieveAPIView):
+    serializer_class = AnswerSerializer
+
+    def get(self, request, *args, **kwargs):
+        giver_telegram_id = request.query_params.get('telegram_id')
+        question_code = request.query_params.get('question_code')
+
+        if not giver_telegram_id:
+            return Response({"status": 400, "detail": "giver_telegram_id query param is required"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        if not question_code:
+            return Response({"status": 400, "detail": "question_code query param is required"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        giver = Gifter.objects.filter(telegram_id=giver_telegram_id).first()
+        if not giver:
+            return Response({"status": 404, "detail": "No giver found with the provided giver_telegram_id"},
+                            status=status.HTTP_404_NOT_FOUND)
+        question = Question.objects.filter(pk=question_code, gifter=giver).first()
+        if not question:
+            return Response({"status": 404, "detail": "No question found for the provided question_code and giver"},
+                            status=status.HTTP_404_NOT_FOUND)
+        correct_answers = Answer.objects.filter(question_code=question, is_correct=True)
+        correct_answer_count = correct_answers.count()
+        if correct_answer_count < 200:
+            answer_data = []
+            for answer in correct_answers:
+                taker_username = answer.taker.user_name if answer.taker.user_name else "No username"
+                taker_name = answer.taker.first_name if answer.taker.first_name else "No name"
+                taker_id = answer.taker.telegram_id
+                answer_data.append({
+                    'taker_username': taker_username,
+                    'taker_name': taker_name,
+                    'answer': answer.answer_text,
+                    'taker_id': taker_id
+                })
+            return Response({"status": 200, "correct_answers": answer_data,
+                             "detail": "Correct answers found but less than 20"},
+                            status=status.HTTP_200_OK)
+        buffer = io.BytesIO()
+        p = canvas.Canvas(buffer, pagesize=letter)
+        p.drawString(100, 750, f"Giver: {giver_telegram_id}")
+        p.drawString(100, 725, f"Question Code: {question_code}")
+        p.drawString(100, 700, f"Total Correct Answers: {correct_answer_count}")
+        y_position = 675
+        for idx, answer in enumerate(correct_answers, start=1):
+            taker_username = answer.taker.user_name if answer.taker.user_name else "No username"
+            taker_name = answer.taker.first_name if answer.taker.first_name else "No name"
+            
+            p.drawString(100, y_position, f"Taker {idx} - Username: {taker_username}, Name: {taker_name}")
+            y_position -= 25
+            p.drawString(100, y_position, f"Correct Answer {idx}: {answer.answer_text}")
+            y_position -= 25 
+        p.showPage()
+        p.save()
+        buffer.seek(0)
+        response = HttpResponse(buffer, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="correct_answers_{question_code}.pdf"'
+        return response
+
 
 # TELEGRAM_BOT_WEBHOOK_URL = "https://bcd68b0417f6aeef18b0fe38d16faa40.serveo.net/account/web-hook"
 
