@@ -17,6 +17,7 @@ INVITE_LINK = "https://t.me/GiveawayChallenge_bot?start={}"
 
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 bot = telebot.TeleBot(BOT_TOKEN)
+WELCOME_IMAGE = os.getenv('welcome_image')
 
 # @bot.message_handler(commands=["language", ("language", "amharic")])
 def select_language(message):
@@ -168,8 +169,8 @@ def Giver_welcome(message, userId=None):
     inline_markup.row(btn1, btn2)
     inline_markup.row(btn3, btn4)
 
-    with open('./Assets/welcome_dr.png', 'rb') as photo:
-        bot.send_photo(message.chat.id, photo, caption=welcome_msg, reply_markup=inline_markup)
+    bot.send_photo(message.chat.id, WELCOME_IMAGE, caption=welcome_msg, reply_markup=inline_markup)
+
     try:
         bot.delete_message(message.chat.id, message.message_id)
     except telebot.apihelper.ApiTelegramException as e:
@@ -355,8 +356,6 @@ def handle_giver_result(message, telegram_id):
 
             bot.send_message(chat_id=6296919002, text=f"Winers of question 👇 \n\n {question_code} 🥇🥇🥇",
                              reply_markup=inline_markup)
-
-
     try:
         bot.delete_message(message.chat.id, message.message_id)
     except telebot.apihelper.ApiTelegramException as e:
