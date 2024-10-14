@@ -10,6 +10,7 @@ from telebot import types
 from dotenv import load_dotenv
 from messages import *
 from translations import translate as _
+from settings import giver_settings, change_language
 
 
 load_dotenv()
@@ -26,7 +27,7 @@ def select_language(message):
     btn2 = types.InlineKeyboardButton("አማርኛ", callback_data="amharic")
     markup.add(btn1, btn2)
     with open('./Assets/languages.png', 'rb') as photo:
-        bot.send_photo(message.chat.id, photo, caption="sdfslkdfj", reply_markup=markup)
+        bot.send_photo(message.chat.id, photo, caption="Select you prefer language", reply_markup=markup)
 
 def delete_message_after_delay(chat_id, message_id, delay_seconds):
     time.sleep(delay_seconds)
@@ -164,7 +165,7 @@ def Giver_welcome(message, userId=None):
     welcome_msg = _(start_msg, language)
     btn1 = types.InlineKeyboardButton(_("Question Code 🧑‍💻", language), callback_data="question_code")
     btn2 = types.InlineKeyboardButton(_("Result 🧧", language), callback_data="result_giver")
-    btn3 = types.InlineKeyboardButton(_("Settings ⚙️", language), callback_data="settings")
+    btn3 = types.InlineKeyboardButton(_("Settings ⚙️", language), callback_data="giver_setting")
     btn4 = types.InlineKeyboardButton(_("Invite Friends 🤝", language), url=INVITE_LINK)
     inline_markup.row(btn1, btn2)
     inline_markup.row(btn3, btn4)
@@ -263,6 +264,11 @@ def handle_call_back(callback):
                          "you can now send your answer" )
         bot.register_next_step_handler(
             callback.message, handle_taker_answer, telegram_id=telegram_id)
+    if command == "giver_setting":
+        user = get_user(telegram_id=telegram_id)
+        giver_settings(user=user, message=callback.message, bot=bot)
+    if command == "change_lang":
+        change_language(callback.message, bot=bot)
 
 def handle_taker_answer(message, telegram_id):
     user = get_user(telegram_id=telegram_id)
