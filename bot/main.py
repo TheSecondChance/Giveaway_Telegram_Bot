@@ -250,7 +250,7 @@ def handle_call_back(callback):
         copy_code = f"`{question_code}`"
         welcome_msg = f"Please past this code on you question details 👇\n\n {copy_code}"
         btn1 = types.InlineKeyboardButton(_("Home 🏠", language), callback_data="home")
-        btn2 = types.InlineKeyboardButton(_("Back 🔙", language), callback_data="back")
+        btn2 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="back")
         inline_markup.row(btn1, btn2)
 
         bot.send_message(callback.message.chat.id, text=welcome_msg, reply_markup=inline_markup, parse_mode="Markdown")
@@ -271,6 +271,8 @@ def handle_call_back(callback):
         change_language(callback.message, bot=bot)
     if command == "change_role":
         chose_role(callback.message)
+    if command == "taker_home":
+        taker_welcome(callback.message, userId=telegram_id)
 
 def handle_taker_answer(message, telegram_id):
     user = get_user(telegram_id=telegram_id)
@@ -289,17 +291,21 @@ def handle_taker_answer(message, telegram_id):
         'question_code': question_code
     }
     response = create_answer(telegram_id=telegram_id, created_data=data)
-    if response.get('status') == 201:
-        welcome_msg = f"Answer Received ✅"
-    elif response.get('status') == 404:
-        welcome_msg = f"Answer not Received ❌ \n\n Resone: There is no question code"
+    if response is not None:
+        if response.get('status') == 201:
+            welcome_msg = f"Answer Received ✅"
+        elif response.get('status') == 404:
+            welcome_msg = f"Answer not Received ❌ \n\n Resone: There is no question code"
+        elif response.get('status') == 400:
+            welcome_msg = f"Answer not Received ❌ \n\nPlease try again make sure you have entered the correct question code"
+        else:
+            welcome_msg = f"Answer not Received ❌ \n\nPlease try again something wrong in you answer format"
     else:
-        welcome_msg = f"Answer not Received ❌ \n\n Resone: you can answer only once"
+        welcome_msg = f"Answer not Received ❌ \n\nPlease try again make sure you have entered the correct question code"
     inline_markup = types.InlineKeyboardMarkup(row_width=2)
     language = user.get('language', None)
-    btn1 = types.InlineKeyboardButton(_("Home 🏠", language), callback_data="taker_home")
-    btn2 = types.InlineKeyboardButton(_("Back 🔙", language), callback_data="back")
-    inline_markup.row(btn1, btn2)
+    btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="taker_home")
+    inline_markup.row(btn1)
     bot.send_message(message.chat.id, text=welcome_msg, reply_markup=inline_markup)
 
 def handle_question_answer(message, telegram_id):
@@ -316,7 +322,7 @@ def handle_question_answer(message, telegram_id):
     copy_code = f"`{question_code}`"
     welcome_msg = f"Answer Received ✅ \n\nPlease past this code on you question details 👇\n\n {copy_code} "
     btn1 = types.InlineKeyboardButton(_("Home 🏠", language), callback_data="home")
-    btn2 = types.InlineKeyboardButton(_("Back 🔙", language), callback_data="back")
+    btn2 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="back")
     inline_markup.row(btn1, btn2)
 
     bot.send_photo(message.chat.id, WELCOME_IMAGE, caption=welcome_msg, reply_markup=inline_markup, parse_mode="Markdown")
@@ -364,7 +370,7 @@ def handle_giver_result(message, telegram_id):
                 inline_markup.add(button)
 
             btn1 = types.InlineKeyboardButton(_("Home 🏠", language), callback_data="home")
-            btn2 = types.InlineKeyboardButton(_("Back 🔙", language), callback_data="back")
+            btn2 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="back")
             inline_markup.row(btn1, btn2)
 
             bot.send_message(chat_id=6296919002, text=f"Winers of question 👇 \n\n {question_code} 🥇🥇🥇",
@@ -381,7 +387,7 @@ def question_answer_time(message, userId=None):
     welcome_msg = _(start_msg, language)
     btn1 = types.InlineKeyboardButton(_("I know answer now 🚀", language), callback_data="now")
     btn2 = types.InlineKeyboardButton(_("After taker submite 😉", language), callback_data="after")
-    btn3 = types.InlineKeyboardButton(_("Back 🔙", language), callback_data="home")
+    btn3 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
     inline_markup.row(btn1, btn2)
     inline_markup.row(btn3)
     bot.send_photo(message.chat.id, WELCOME_IMAGE, caption=welcome_msg, reply_markup=inline_markup)
@@ -395,7 +401,7 @@ def back_buttons(user, message, welcome_msg):
     inline_markup = types.InlineKeyboardMarkup(row_width=2)
     language = user.get('language', None)
     btn1 = types.InlineKeyboardButton(_("Home 🏠", language), callback_data="home")
-    btn2 = types.InlineKeyboardButton(_("Back 🔙", language), callback_data="home")
+    btn2 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
     inline_markup.row(btn1, btn2)
     bot.send_message(message.chat.id, text=welcome_msg, reply_markup=inline_markup)
 
