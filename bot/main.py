@@ -4,7 +4,8 @@ import re
 import time
 import telebot
 from api import (get_user, create_user, update_user, create_question,
-                 create_answer, giver_result, user_exists)
+                 create_answer, giver_result, user_exists,
+                 get_after_answer, update_after_answer)
 import threading
 from telebot import types
 from dotenv import load_dotenv
@@ -165,10 +166,13 @@ def Giver_welcome(message, userId=None):
     welcome_msg = _(start_msg, language)
     btn1 = types.InlineKeyboardButton(_("Question Code 🧑‍💻", language), callback_data="question_code")
     btn2 = types.InlineKeyboardButton(_("Result 🧧", language), callback_data="result_giver")
+    btn5 = types.InlineKeyboardButton(_("Insert Answer 🎈", language), callback_data="insert_answer")
     btn3 = types.InlineKeyboardButton(_("Settings ⚙️", language), callback_data="settings")
     btn4 = types.InlineKeyboardButton(_("Invite Friends 🤝", language), url=INVITE_LINK)
     inline_markup.row(btn1, btn2)
-    inline_markup.row(btn3, btn4)
+    inline_markup.row(btn5, btn3)
+    inline_markup.row(btn4)
+
 
     bot.send_photo(message.chat.id, WELCOME_IMAGE, caption=welcome_msg, reply_markup=inline_markup)
 
@@ -272,7 +276,18 @@ def handle_call_back(callback):
         chose_role(callback.message)
     if command == "taker_home":
         taker_welcome(callback.message, userId=telegram_id)
+    if command == "insert_answer":
+        insert_answer(callback.message, userId=telegram_id)
+    if command.isdigit():
+        question_code = command
+        user = get_user(telegram_id=telegram_id)
 
+        bot.send_message(callback.message.chat.id,
+                         f"you can now send your answer for 👉 {question_code}" )
+        bot.register_next_step_handler(
+            callback.message, update_question_answer, telegram_id=telegram_id,
+            question_code=question_code)
+        
 def handle_taker_answer(message, telegram_id):
     user = get_user(telegram_id=telegram_id)
     telegram_id = message.from_user.id
@@ -368,9 +383,8 @@ def handle_giver_result(message, telegram_id):
                 button = types.InlineKeyboardButton(text="Click to send a givet 💬", url=f"tg://user?id={valid_user}")
                 inline_markup.add(button)
 
-            btn1 = types.InlineKeyboardButton(_("Home 🏠", language), callback_data="home")
-            btn2 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="back")
-            inline_markup.row(btn1, btn2)
+            btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
+            inline_markup.row(btn1)
 
             bot.send_message(chat_id=6296919002, text=f"Winers of question 👇 \n\n {question_code} 🥇🥇🥇",
                              reply_markup=inline_markup)
@@ -400,9 +414,52 @@ def back_buttons(user, message, welcome_msg):
     inline_markup = types.InlineKeyboardMarkup(row_width=2)
     language = user.get('language', None)
     btn1 = types.InlineKeyboardButton(_("Home 🏠", language), callback_data="home")
-    btn2 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
-    inline_markup.row(btn1, btn2)
+    inline_markup.row(btn1)
     bot.send_message(message.chat.id, text=welcome_msg, reply_markup=inline_markup)
+
+def insert_answer(message, userId=None):
+    user = get_user(telegram_id=userId)
+    language = user.get('language', None)
+    inline_markup = types.InlineKeyboardMarkup(row_width=2)
+    response = get_after_answer(telegram_id=userId)
+    if response is not None:
+        question_codes = [item['question_code'] for item in response['data']]
+        for question_code in question_codes:
+            button = types.InlineKeyboardButton(text=f"Add answer in to 👉 {question_code}",
+                                                callback_data=question_code)
+            inline_markup.add(button)
+        btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
+        inline_markup.row(btn1)
+        bot.send_message(chat_id=6296919002, text=f"Select question code to insert answer 👇",
+                        reply_markup=inline_markup)
+    else:
+        welcome_msg = "Your All Question Have Correct Answer 😊"
+        back_buttons(user, message, welcome_msg)
+    try:
+        bot.delete_message(message.chat.id, message.message_id)
+    except telebot.apihelper.ApiTelegramException as e:
+        print(f"Failed welcome to delete message {message.message_id}: {e}")
+
+def update_question_answer(message, telegram_id, question_code):
+    user = get_user(telegram_id=telegram_id)
+    answer = message.text
+    telegram_id = message.chat.id
+    data = {
+        'correct_answer': answer,
+    }
+    update_after_answer(telegram_id=telegram_id, question_code=question_code, updated_data=data)
+    question_code = question_code
+    inline_markup = types.InlineKeyboardMarkup(row_width=2)
+    language = user.get('language', None)
+    welcome_msg = f"Answer Received ✅ for question {question_code}\n\n\n\n "
+    btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
+    inline_markup.row(btn1)
+
+    bot.send_photo(message.chat.id, WELCOME_IMAGE, caption=welcome_msg, reply_markup=inline_markup, parse_mode="Markdown")
+    try:
+        bot.delete_message(message.chat.id, message.message_id)
+    except telebot.apihelper.ApiTelegramException as e:
+        print(f"Failed welcome to delete message {message.message_id}: {e}")
 
 bot.remove_webhook()
 bot.infinity_polling()
