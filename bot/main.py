@@ -249,9 +249,8 @@ def handle_call_back(callback):
         language = user.get('language', None)
         copy_code = f"`{question_code}`"
         welcome_msg = f"Please past this code on you question details 👇\n\n {copy_code}"
-        btn1 = types.InlineKeyboardButton(_("Home 🏠", language), callback_data="home")
-        btn2 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="back")
-        inline_markup.row(btn1, btn2)
+        btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
+        inline_markup.row(btn1)
 
         bot.send_message(callback.message.chat.id, text=welcome_msg, reply_markup=inline_markup, parse_mode="Markdown")
         try:
