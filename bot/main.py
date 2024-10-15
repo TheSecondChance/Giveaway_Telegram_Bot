@@ -15,7 +15,6 @@ from settings import giver_settings, change_language
 
 
 load_dotenv()
-INVITE_LINK = "https://t.me/GiveawayChallenge_bot?start={}"
 
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 bot = telebot.TeleBot(BOT_TOKEN)
@@ -128,7 +127,7 @@ def start(message):
         if is_giver == True:
             Giver_welcome(message, userId=message.chat.id)
         elif is_taker == True:
-            taker_welcome(message) 
+            taker_welcome(message, userId=message.chat.id) 
         elif is_phone_exisit is not None:
             chose_role(message)
         else:
@@ -168,7 +167,7 @@ def Giver_welcome(message, userId=None):
     btn2 = types.InlineKeyboardButton(_("Result 🧧", language), callback_data="result_giver")
     btn5 = types.InlineKeyboardButton(_("Insert Answer 🎈", language), callback_data="insert_answer")
     btn3 = types.InlineKeyboardButton(_("Settings ⚙️", language), callback_data="settings")
-    btn4 = types.InlineKeyboardButton(_("Invite Friends 🤝", language), url=INVITE_LINK)
+    btn4 = types.InlineKeyboardButton(_("Invite Friends 🤝", language), switch_inline_query="invite")
     inline_markup.row(btn1, btn2)
     inline_markup.row(btn5, btn3)
     inline_markup.row(btn4)
@@ -191,7 +190,7 @@ def taker_welcome(message, userId=None):
     welcome_msg = _(start_msg, language)
     btn1 = types.InlineKeyboardButton(_("Answer ⭐", language), callback_data="answer")
     btn2 = types.InlineKeyboardButton(_("Settings ⚙️", language), callback_data="settings")
-    btn3 = types.InlineKeyboardButton(_("Invite Friends 🤝", language), url=INVITE_LINK)
+    btn3 = types.InlineKeyboardButton(_("Invite Friends 🤝", language), switch_inline_query="invite")
     inline_markup.row(btn1, btn2)
     inline_markup.row(btn3)
 
