@@ -4,6 +4,7 @@ import json, telebot
 from reportlab.pdfgen import canvas
 from django.http import HttpResponse
 from reportlab.lib.pagesizes import letter
+from django.db import transaction
 from django.http.response import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.mixins import CreateModelMixin, UpdateModelMixin, RetrieveModelMixin
@@ -192,6 +193,62 @@ class ResultGiverViewSet(RetrieveAPIView):
         response = HttpResponse(buffer, content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="correct_answers_{question_code}.pdf"'
         return response
+
+class AfterAnswerViewSet(RetrieveAPIView, UpdateAPIView):
+    serializer_class = QuestionSerializer
+
+    def get(self, request, *args, **kwargs):
+        giver_telegram_id = request.query_params.get('telegram_id')
+        if not giver_telegram_id:
+            return Response({"status": 400, "detail": "giver_telegram_id query param is required"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        giver = Gifter.objects.filter(telegram_id=giver_telegram_id).first()
+        if not giver:
+            return Response({"status": 404, "detail": "No giver found with the provided giver_telegram_id"},
+                            status=status.HTTP_404_NOT_FOUND)
+        empty_correct_answers = Question.objects.filter(correct_answer=None, gifter=giver)
+        if not empty_correct_answers.exists():
+            return Response({"status": 404, "detail": "No questions with empty correct_answer found"},
+                            status=status.HTTP_404_NOT_FOUND)
+        serializer = self.serializer_class(empty_correct_answers, many=True)
+        return Response({"status": 200, "detail": "Questions fetched successfully", "data": serializer.data})
+
+    def put(self, request, *args, **kwargs):
+        giver_telegram_id = request.query_params.get('telegram_id')
+        question_code = request.query_params.get('question_code')
+        correct_answer = request.data.get('correct_answer')
+
+        if not giver_telegram_id:
+            return Response({"status": 400, "detail": "giver_telegram_id query param is required"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        if not question_code:
+            return Response({"status": 400, "detail": "question_code query param is required"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        if not correct_answer:
+            return Response({"status": 400, "detail": "correct_answer is required"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        giver = Gifter.objects.filter(telegram_id=giver_telegram_id).first()
+        if not giver:
+            return Response({"status": 404, "detail": "No giver found with the provided giver_telegram_id"},
+                            status=status.HTTP_404_NOT_FOUND)
+        question = Question.objects.filter(pk=question_code, gifter=giver).first()
+        if not question:
+            return Response({"status": 404, "detail": "No question found for the provided question_code and giver"},
+                            status=status.HTTP_404_NOT_FOUND)
+        question.correct_answer = correct_answer
+        question.save()
+        answers = Answer.objects.filter(question_code=question)
+        updated_answers = []
+        for answer in answers:
+            if answer.answer_text and answer.answer_text.strip().lower() == correct_answer.strip().lower():
+                answer.is_correct = True
+            else:
+                answer.is_correct = False
+            updated_answers.append(answer)
+        with transaction.atomic():
+            Answer.objects.bulk_update(updated_answers, ['is_correct'])
+        return Response({"status": 200, "detail": "Answers updated successfully"})
+
 
 
 # TELEGRAM_BOT_WEBHOOK_URL = "https://bcd68b0417f6aeef18b0fe38d16faa40.serveo.net/account/web-hook"
