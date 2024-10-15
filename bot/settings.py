@@ -10,7 +10,7 @@ def giver_settings(user, message, bot):
     language = user.get('language', None)
     btn1 = types.InlineKeyboardButton(_("Change Language 🔊", language), callback_data="change_lang")
     btn2 = types.InlineKeyboardButton(_("Change Role ⚒️", language), callback_data="change_role")
-    btn3 = types.InlineKeyboardButton(_("Back 🔙", language), callback_data="home")
+    btn3 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
     inline_markup.row(btn1, btn2)
     inline_markup.row(btn3)
     welcome_msg = f"Welcome {first_name} to this settings! \n\nHere you can change your language, role, and more."
