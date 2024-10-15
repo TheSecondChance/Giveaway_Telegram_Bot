@@ -125,7 +125,9 @@ class AnswerViewSet(CreateModelMixin, GenericViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
         is_correct = False
         if question.correct_answer and answer_text:
-            is_correct = (answer_text.strip().lower() == question.correct_answer.strip().lower())
+            normalized_answer_text = answer_text.replace(" ", "").strip().lower()
+            normalized_correct_answer = question.correct_answer.replace(" ", "").strip().lower()
+            is_correct = normalized_answer_text == normalized_correct_answer
         data = request.data.copy()
         data['taker'] = taker.pk
         data['is_correct'] = is_correct
@@ -240,8 +242,13 @@ class AfterAnswerViewSet(RetrieveAPIView, UpdateAPIView):
         answers = Answer.objects.filter(question_code=question)
         updated_answers = []
         for answer in answers:
-            if answer.answer_text and answer.answer_text.strip().lower() == correct_answer.strip().lower():
-                answer.is_correct = True
+            if answer.answer_text:
+                normalized_answer_text = answer.answer_text.replace(" ", "").strip().lower()
+                normalized_correct_answer = correct_answer.replace(" ", "").strip().lower()
+                if normalized_answer_text == normalized_correct_answer:
+                    answer.is_correct = True
+                else:
+                    answer.is_correct = False
             else:
                 answer.is_correct = False
             updated_answers.append(answer)
