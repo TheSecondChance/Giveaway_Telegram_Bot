@@ -11,7 +11,7 @@ from telebot import types
 from dotenv import load_dotenv
 from messages import *
 from translations import translate as _
-from settings import giver_settings, change_language
+from settings import giver_settings, change_language, delete_account, delete_account_yes
 
 
 load_dotenv()
@@ -286,7 +286,13 @@ def handle_call_back(callback):
         bot.register_next_step_handler(
             callback.message, update_question_answer, telegram_id=telegram_id,
             question_code=question_code)
-        
+    if command == "delete_account":
+        user = get_user(telegram_id=telegram_id)
+        delete_account(user=user, message=callback.message, bot=bot)
+    if command == "delete_yes":
+        user = get_user(telegram_id=telegram_id)
+        delete_account_yes(user=user, message=callback.message, bot=bot, userId=telegram_id)
+
 def handle_taker_answer(message, telegram_id):
     user = get_user(telegram_id=telegram_id)
     telegram_id = message.from_user.id
