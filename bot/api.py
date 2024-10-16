@@ -226,3 +226,28 @@ def update_after_answer(telegram_id: int, question_code: int, updated_data: dict
                         status=status.HTTP_400_BAD_REQUEST)
     else:
         return Response({"detail": "something wrong"},  response.status_code)
+
+def delete_account_api(telegram_id: int) -> Optional[Dict[str, Any]]:
+    """Delete user account by sending a DELETE request.
+
+    Args:
+        telegram_id (int): The user's Telegram ID.
+
+    Returns:
+        Optional[Dict[str, Any]]: The response data if the request is successful,
+        or an error message if something goes wrong.
+    """
+    endpoint = 'api/get-telegram-id/'
+    params = {
+        'telegram_id': telegram_id
+    }
+
+    response = requests.delete(BASE_URL + endpoint, params=params)
+
+    if response.status_code == 204:
+        return {"detail": "Account deleted successfully", "status": 204}
+    elif response.status_code == 404:
+        return {"detail": "No user found with the provided telegram_id", "status": 404}
+    else:
+        print(f"Something went wrong in delete account: {response.status_code} - {response.text}")
+        return None
