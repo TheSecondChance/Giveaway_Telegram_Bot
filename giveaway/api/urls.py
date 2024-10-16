@@ -12,7 +12,7 @@ router.register(r'answer', AnswerViewSet, basename="answer-for-taker")
 
 urlpatterns = [
     path("web-hook", hook, name="web-hook"),
-    path("get-telegram-id/", UserTelegramIdViewSet.as_view(), name="get-by-tg-id"),
+    path("user/", UserTelegramIdViewSet.as_view(), name="get-by-tg-id"),
     path("result/", ResultGiverViewSet.as_view(), name="result-for-giver"),
     path("after/", AfterAnswerViewSet.as_view(), name="after-answer"),
 ]

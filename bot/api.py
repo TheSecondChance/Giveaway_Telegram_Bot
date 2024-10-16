@@ -24,7 +24,7 @@ def get_user(telegram_id: int) -> Optional[Dict[str, Any]]:
         'telegram_id': telegram_id
     }
 
-    response = requests.get(BASE_URL + "api/get-telegram-id/", params=params)
+    response = requests.get(BASE_URL + "api/user/", params=params)
 
     if response.status_code == 200:
         return response.json()
@@ -70,7 +70,7 @@ def update_user(telegram_id: int, updated_data: dict) -> Optional[Dict[str, Any]
         'telegram_id': telegram_id
     }
     response = requests.put(
-        url=BASE_URL + 'api/get-telegram-id/',
+        url=BASE_URL + 'api/user/',
         params=params,
         json=updated_data
     )
@@ -237,7 +237,7 @@ def delete_account_api(telegram_id: int) -> Optional[Dict[str, Any]]:
         Optional[Dict[str, Any]]: The response data if the request is successful,
         or an error message if something goes wrong.
     """
-    endpoint = 'api/get-telegram-id/'
+    endpoint = 'api/user/'
     params = {
         'telegram_id': telegram_id
     }
