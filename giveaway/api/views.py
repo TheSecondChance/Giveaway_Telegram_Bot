@@ -11,7 +11,7 @@ from rest_framework.mixins import CreateModelMixin, UpdateModelMixin, RetrieveMo
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.generics import RetrieveAPIView, UpdateAPIView
+from rest_framework.generics import RetrieveAPIView, UpdateAPIView, DestroyAPIView
 
 from .serializers import (UserSerializer, UserTelegramIdSerializer,
                           QuestionSerializer, AnswerSerializer)
@@ -35,7 +35,7 @@ class UserCreateViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-class UserTelegramIdViewSet(RetrieveAPIView, UpdateAPIView):
+class UserTelegramIdViewSet(RetrieveAPIView, UpdateAPIView, DestroyAPIView):
     serializer_class = UserTelegramIdSerializer
 
     def get(self, request, *args, **kwargs):
@@ -63,6 +63,21 @@ class UserTelegramIdViewSet(RetrieveAPIView, UpdateAPIView):
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
                 return Response(serializer.data)
+            else:
+                return Response({"detail": "No user found with the provided telegram_id"},
+                                status=status.HTTP_404_NOT_FOUND)
+
+        return Response({"detail": "telegram_id query param is required"},
+                        status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, *args, **kwargs):
+        telegram_id = request.query_params.get('telegram_id')
+        if telegram_id:
+            user = User.objects.filter(telegram_id=telegram_id).first()
+            if user:
+                user.delete()
+                return Response({"detail": "User deleted successfully"},
+                                status=status.HTTP_204_NO_CONTENT)
             else:
                 return Response({"detail": "No user found with the provided telegram_id"},
                                 status=status.HTTP_404_NOT_FOUND)
