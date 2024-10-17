@@ -203,64 +203,48 @@ def taker_welcome(message, userId=None):
     
 @bot.callback_query_handler(func=lambda call: True)
 def handle_call_back(callback):
-    command = callback.data
     telegram_id=callback.message.chat.id
     user = get_user(telegram_id=telegram_id)
+    
     if user is not None:
+        command = callback.data
         language = user.get('language', None)
-    else:
-        start(callback.message)
-
-    if command == "giver":
-        if user is not None:
+        if command == "giver":
             data = {
                 "is_gifter": True,
                 "is_taker": False,
             }
             update_user(telegram_id=telegram_id, updated_data=data)
             Giver_welcome(callback.message, userId=telegram_id)
-        else:
-            start(callback.message)
 
-    if command == "taker":
-        if user is not None:
+        if command == "taker":
             data = {
                 "is_gifter": False,
                 "is_taker": True,
             }
             update_user(telegram_id=telegram_id, updated_data=data)
             taker_welcome(callback.message, userId=telegram_id)
-        else:
-            start(callback.message)
 
-    if command == "question_code":
-        if user is not None:
+        if command == "question_code":
             question_answer_time(callback.message, userId=telegram_id)
-        else:
-            start(callback.message)
 
-    if command == "now":
-        if user is not None:
+        if command == "now":
             msg = _(send_answer_msg, language)
             bot.send_message(callback.message.chat.id, msg)
             bot.register_next_step_handler(
                 callback.message, handle_question_answer, telegram_id=telegram_id)
-        else:
+
+        if command == "home":
             start(callback.message)
-            
-    if command == "home":
-        start(callback.message)
-    if command == "result_giver":
-        if user is not None:
+
+        if command == "result_giver":
             telegram_id = callback.from_user.id
             msg = _(result_msg, language)
             bot.send_message(callback.message.chat.id, msg)
             bot.register_next_step_handler(
                 callback.message, handle_giver_result, telegram_id=telegram_id)
-        else:
-            start(callback.message)
-    if command == "after":
-        if user is not None:
+
+        if command == "after":
             user = get_user(telegram_id=telegram_id)
             data = {}
             response = create_question(telegram_id=telegram_id, created_data=data)
@@ -272,45 +256,34 @@ def handle_call_back(callback):
             inline_markup.row(btn1)
 
             bot.send_message(callback.message.chat.id, text=f"{msg}".format(copy_code),
-                             reply_markup=inline_markup, parse_mode="Markdown")
+                            reply_markup=inline_markup, parse_mode="Markdown")
             try:
                 bot.delete_message(callback.message.chat.id, callback.message.message_id)
             except telebot.apihelper.ApiTelegramException as e:
                 print(f"Failed welcome to delete message {callback.message.message_id}: {e}")
-        else:
-            start(callback.message)
-    if command == "answer":
-        if user is not None:
+
+        if command == "answer":
             msg = _(answer_msg, language)
             bot.send_message(callback.message.chat.id, msg)
             bot.register_next_step_handler(
                 callback.message, handle_taker_answer, telegram_id=telegram_id)
-        else:
-            start(callback.message)
-    if command == "settings":
-        if user is not None:
+
+        if command == "settings":
             user_settings(user=user, message=callback.message, bot=bot)
-        else:
-            start(callback.message)
-    if command == "change_lang":
-        if user is not None:
+
+        if command == "change_lang":
             change_language(language, callback.message, bot=bot)
-        else:
-            start(callback.message)
-    if command == "change_role":
-        if user is not None:
+
+        if command == "change_role":
             chose_role(language ,callback.message)
-        else:
-            start(callback.message)
-    if command == "taker_home":
-        taker_welcome(callback.message, userId=telegram_id)
-    if command == "insert_answer":
-        if user is not None:
+ 
+        if command == "taker_home":
+            taker_welcome(callback.message, userId=telegram_id)
+
+        if command == "insert_answer":
             insert_answer(callback.message, userId=telegram_id)
-        else:
-            start(callback.message)
-    if command.isdigit():
-        if user is not None:
+
+        if command.isdigit():
             question_code = command
             user = get_user(telegram_id=telegram_id)
 
@@ -319,18 +292,14 @@ def handle_call_back(callback):
             bot.register_next_step_handler(
                 callback.message, update_question_answer, telegram_id=telegram_id,
                 question_code=question_code)
-        else:
-            start(callback.message)
-    if command == "delete_account":
-        if user is not None:
+            
+        if command == "delete_account":
             delete_account(language, message=callback.message, bot=bot)
-        else:
-            start(callback.message)
-    if command == "delete_yes":
-        if user is not None:
+
+        if command == "delete_yes":
             delete_account_yes(user=user, message=callback.message, bot=bot, userId=telegram_id)
-        else:
-            start(callback.message)
+    else:
+        start(callback.message)
 
 def handle_taker_answer(message, telegram_id):
     user = get_user(telegram_id=telegram_id)
