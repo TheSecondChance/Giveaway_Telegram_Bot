@@ -1,6 +1,6 @@
 import io
 import json, telebot
-# from bot.main import bot
+from bot.main import bot
 from reportlab.pdfgen import canvas
 from django.http import HttpResponse
 from reportlab.lib.pagesizes import letter
@@ -273,8 +273,9 @@ class AfterAnswerViewSet(RetrieveAPIView, UpdateAPIView):
 
 
 
-# TELEGRAM_BOT_WEBHOOK_URL = "https://bcd68b0417f6aeef18b0fe38d16faa40.serveo.net/account/web-hook"
+TELEGRAM_BOT_WEBHOOK_URL = "https://8ce25521eba65f4ae51632fc07631afe.serveo.net/api/web-hook"
 
-# webhook_url = f'{TELEGRAM_BOT_WEBHOOK_URL}'
-# bot.remove_webhook()
-# bot.set_webhook(url=webhook_url)
+
+webhook_url = f'{TELEGRAM_BOT_WEBHOOK_URL}'
+bot.remove_webhook()
+bot.set_webhook(url=webhook_url)
