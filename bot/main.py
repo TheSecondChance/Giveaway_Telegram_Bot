@@ -11,7 +11,7 @@ from telebot import types
 from dotenv import load_dotenv
 from messages import *
 from translations import translate as _
-from settings import giver_settings, change_language, delete_account, delete_account_yes
+from settings import user_settings, change_language, delete_account, delete_account_yes
 
 
 load_dotenv()
@@ -20,14 +20,13 @@ BOT_TOKEN = os.getenv('BOT_TOKEN')
 bot = telebot.TeleBot(BOT_TOKEN)
 WELCOME_IMAGE = os.getenv('welcome_image')
 
-# @bot.message_handler(commands=["language", ("language", "amharic")])
 def select_language(message):
     markup = types.InlineKeyboardMarkup(row_width=2)
     btn1 = types.InlineKeyboardButton("English", callback_data="english")
     btn2 = types.InlineKeyboardButton("አማርኛ", callback_data="amharic")
     markup.add(btn1, btn2)
     with open('./Assets/languages.png', 'rb') as photo:
-        bot.send_photo(message.chat.id, photo, caption="Select you prefer language", reply_markup=markup)
+        bot.send_photo(message.chat.id, photo, caption="Select your preferred language", reply_markup=markup)
 
 def delete_message_after_delay(chat_id, message_id, delay_seconds):
     time.sleep(delay_seconds)
@@ -120,6 +119,8 @@ def handle_shared_contact(message: types.Message):
 @bot.message_handler(commands=['start', 'restart']) 
 def start(message):
     user = get_user(telegram_id=message.chat.id)
+    if user is not None:
+        language = user.get('language', None)
     if user != None:
         is_phone_exisit = user.get('phone_number')
         is_giver = user.get('is_gifter')
@@ -129,7 +130,7 @@ def start(message):
         elif is_taker == True:
             taker_welcome(message, userId=message.chat.id) 
         elif is_phone_exisit is not None:
-            chose_role(message)
+            chose_role(language, message)
         else:
             select_language(message)
     else:
@@ -139,17 +140,16 @@ def start(message):
         except telebot.apihelper.ApiTelegramException as e:
             print(f"This is Failed start to delete message {message.message_id}: {e}")
 
-def chose_role(message):
-    user = get_user(telegram_id=message.chat.id)
+def chose_role(language, message):
     inline_markup = types.InlineKeyboardMarkup(row_width=2)
-    language = user.get('language', None)
     welcome_msg = _(choose_role, language)
     btn1 = types.InlineKeyboardButton(_("Giver 🎁", language), callback_data="giver")
-    btn2 = types.InlineKeyboardButton(_("Taker 😉", language), callback_data="taker")
+    btn2 = types.InlineKeyboardButton(_("Taker 🧑‍💼", language), callback_data="taker")
+    btn3 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
     inline_markup.row(btn1, btn2)
+    inline_markup.row(btn3)
 
-    with open('./Assets/languages.png', 'rb') as photo:
-        bot.send_photo(message.chat.id, photo, caption=welcome_msg, reply_markup=inline_markup)
+    bot.send_message(message.chat.id, text=welcome_msg, reply_markup=inline_markup)
     try:
         bot.delete_message(message.chat.id, message.message_id)
     except telebot.apihelper.ApiTelegramException as e:
@@ -165,7 +165,7 @@ def Giver_welcome(message, userId=None):
     welcome_msg = _(start_msg, language)
     btn1 = types.InlineKeyboardButton(_("Question Code 🧑‍💻", language), callback_data="question_code")
     btn2 = types.InlineKeyboardButton(_("Result 🧧", language), callback_data="result_giver")
-    btn5 = types.InlineKeyboardButton(_("Insert Answer 🎈", language), callback_data="insert_answer")
+    btn5 = types.InlineKeyboardButton(_("Insert Answer ✏️", language), callback_data="insert_answer")
     btn3 = types.InlineKeyboardButton(_("Settings ⚙️", language), callback_data="settings")
     btn4 = types.InlineKeyboardButton(_("Invite Friends 🤝", language), switch_inline_query="invite")
     inline_markup.row(btn1, btn2)
@@ -187,15 +187,15 @@ def taker_welcome(message, userId=None):
         user = get_user(telegram_id=message.from_user.id)
     inline_markup = types.InlineKeyboardMarkup(row_width=2)
     language = user.get('language', None)
-    welcome_msg = _(start_msg, language)
-    btn1 = types.InlineKeyboardButton(_("Answer ⭐", language), callback_data="answer")
+    msg = _(taker_msg, language)
+    btn1 = types.InlineKeyboardButton(_("Answer 😎", language), callback_data="answer")
     btn2 = types.InlineKeyboardButton(_("Settings ⚙️", language), callback_data="settings")
     btn3 = types.InlineKeyboardButton(_("Invite Friends 🤝", language), switch_inline_query="invite")
     inline_markup.row(btn1, btn2)
     inline_markup.row(btn3)
 
     with open('./Assets/welcome_dr.png', 'rb') as photo:
-        bot.send_photo(message.chat.id, photo, caption=welcome_msg, reply_markup=inline_markup)
+        bot.send_photo(message.chat.id, photo, caption=msg, reply_markup=inline_markup)
     try:
         bot.delete_message(message.chat.id, message.message_id)
     except telebot.apihelper.ApiTelegramException as e:
@@ -206,6 +206,10 @@ def handle_call_back(callback):
     command = callback.data
     telegram_id=callback.message.chat.id
     user = get_user(telegram_id=telegram_id)
+    if user is not None:
+        language = user.get('language', None)
+    else:
+        start(callback.message)
 
     if command == "giver":
         if user is not None:
@@ -237,8 +241,8 @@ def handle_call_back(callback):
 
     if command == "now":
         if user is not None:
-            bot.send_message(callback.message.chat.id,
-                            "you can now send your answer" )
+            msg = _(send_answer_msg, language)
+            bot.send_message(callback.message.chat.id, msg)
             bot.register_next_step_handler(
                 callback.message, handle_question_answer, telegram_id=telegram_id)
         else:
@@ -249,8 +253,8 @@ def handle_call_back(callback):
     if command == "result_giver":
         if user is not None:
             telegram_id = callback.from_user.id
-            bot.send_message(callback.message.chat.id,
-                            "you can now send question code" )
+            msg = _(result_msg, language)
+            bot.send_message(callback.message.chat.id, msg)
             bot.register_next_step_handler(
                 callback.message, handle_giver_result, telegram_id=telegram_id)
         else:
@@ -262,13 +266,13 @@ def handle_call_back(callback):
             response = create_question(telegram_id=telegram_id, created_data=data)
             question_code = response.get('question_code')
             inline_markup = types.InlineKeyboardMarkup(row_width=2)
-            language = user.get('language', None)
             copy_code = f"`{question_code}`"
-            welcome_msg = f"Please past this code on you question details 👇\n\n {copy_code}"
+            msg = _(after_code_msg, language)
             btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
             inline_markup.row(btn1)
 
-            bot.send_message(callback.message.chat.id, text=welcome_msg, reply_markup=inline_markup, parse_mode="Markdown")
+            bot.send_message(callback.message.chat.id, text=f"{msg}".format(copy_code),
+                             reply_markup=inline_markup, parse_mode="Markdown")
             try:
                 bot.delete_message(callback.message.chat.id, callback.message.message_id)
             except telebot.apihelper.ApiTelegramException as e:
@@ -277,25 +281,25 @@ def handle_call_back(callback):
             start(callback.message)
     if command == "answer":
         if user is not None:
-            bot.send_message(callback.message.chat.id,
-                            "you can now send your answer" )
+            msg = _(answer_msg, language)
+            bot.send_message(callback.message.chat.id, msg)
             bot.register_next_step_handler(
                 callback.message, handle_taker_answer, telegram_id=telegram_id)
         else:
             start(callback.message)
     if command == "settings":
         if user is not None:
-            giver_settings(user=user, message=callback.message, bot=bot)
+            user_settings(user=user, message=callback.message, bot=bot)
         else:
             start(callback.message)
     if command == "change_lang":
         if user is not None:
-            change_language(callback.message, bot=bot)
+            change_language(language, callback.message, bot=bot)
         else:
             start(callback.message)
     if command == "change_role":
         if user is not None:
-            chose_role(callback.message)
+            chose_role(language ,callback.message)
         else:
             start(callback.message)
     if command == "taker_home":
@@ -319,7 +323,7 @@ def handle_call_back(callback):
             start(callback.message)
     if command == "delete_account":
         if user is not None:
-            delete_account(user=user, message=callback.message, bot=bot)
+            delete_account(language, message=callback.message, bot=bot)
         else:
             start(callback.message)
     if command == "delete_yes":
@@ -437,13 +441,13 @@ def question_answer_time(message, userId=None):
     user = get_user(telegram_id=userId)
     inline_markup = types.InlineKeyboardMarkup(row_width=2)
     language = user.get('language', None)
-    welcome_msg = _(start_msg, language)
-    btn1 = types.InlineKeyboardButton(_("I know answer now 🚀", language), callback_data="now")
-    btn2 = types.InlineKeyboardButton(_("After taker submite 😉", language), callback_data="after")
+    question_code_msg = _(code_time_msg, language)
+    btn1 = types.InlineKeyboardButton(_("📝 Now Answer", language), callback_data="now")
+    btn2 = types.InlineKeyboardButton(_("📋 Later", language), callback_data="after")
     btn3 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
     inline_markup.row(btn1, btn2)
     inline_markup.row(btn3)
-    bot.send_photo(message.chat.id, WELCOME_IMAGE, caption=welcome_msg, reply_markup=inline_markup)
+    bot.send_message(message.chat.id, text=question_code_msg, reply_markup=inline_markup)
 
     try:
         bot.delete_message(message.chat.id, message.message_id)
@@ -453,7 +457,7 @@ def question_answer_time(message, userId=None):
 def back_buttons(user, message, welcome_msg):
     inline_markup = types.InlineKeyboardMarkup(row_width=2)
     language = user.get('language', None)
-    btn1 = types.InlineKeyboardButton(_("Home 🏠", language), callback_data="home")
+    btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
     inline_markup.row(btn1)
     bot.send_message(message.chat.id, text=welcome_msg, reply_markup=inline_markup)
 
@@ -465,16 +469,18 @@ def insert_answer(message, userId=None):
     if response is not None:
         question_codes = [item['question_code'] for item in response['data']]
         for question_code in question_codes:
-            button = types.InlineKeyboardButton(text=f"Add answer in to 👉 {question_code}",
+            msg = _(btn_insert_answer_mgs, language)
+            button = types.InlineKeyboardButton(text=f"{msg}".format(question_code),
                                                 callback_data=question_code)
             inline_markup.add(button)
         btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
         inline_markup.row(btn1)
-        bot.send_message(chat_id=6296919002, text=f"Select question code to insert answer 👇",
+        msg = _(insert_answer_msg, language)
+        bot.send_message(chat_id=6296919002, text=msg,
                         reply_markup=inline_markup)
     else:
-        welcome_msg = "Your All Question Have Correct Answer 😊"
-        back_buttons(user, message, welcome_msg)
+        msg = _(insert_msg, language)
+        back_buttons(user, message, msg)
     try:
         bot.delete_message(message.chat.id, message.message_id)
     except telebot.apihelper.ApiTelegramException as e:
