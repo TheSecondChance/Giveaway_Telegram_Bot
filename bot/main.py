@@ -3,15 +3,15 @@ import io
 import re
 import time
 import telebot
-from api import (get_user, create_user, update_user, create_question,
+from .api import (get_user, create_user, update_user, create_question,
                  create_answer, giver_result, user_exists,
                  get_after_answer, update_after_answer)
 import threading
 from telebot import types
 from dotenv import load_dotenv
-from messages import *
-from translations import translate as _
-from settings import user_settings, change_language, delete_account, delete_account_yes
+from .messages import *
+from .translations import translate as _
+from .settings import user_settings, change_language, delete_account, delete_account_yes
 
 
 load_dotenv()
@@ -205,7 +205,7 @@ def taker_welcome(message, userId=None):
 def handle_call_back(callback):
     telegram_id=callback.message.chat.id
     user = get_user(telegram_id=telegram_id)
-    
+
     if user is not None:
         command = callback.data
         language = user.get('language', None)
@@ -476,5 +476,5 @@ def update_question_answer(message, telegram_id, question_code):
     except telebot.apihelper.ApiTelegramException as e:
         print(f"Failed welcome to delete message {message.message_id}: {e}")
 
-bot.remove_webhook()
-bot.infinity_polling()
+# bot.remove_webhook()
+# bot.infinity_polling()

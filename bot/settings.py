@@ -1,8 +1,8 @@
 import telebot
 from telebot import types
-from messages import *
-from translations import translate as _
-from api import delete_account_api
+from .messages import *
+from .translations import translate as _
+from .api import delete_account_api
 
 
 def user_settings(user, message, bot):
