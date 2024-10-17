@@ -32,11 +32,13 @@ code_time_msg = """
 
 📝 Now answer - Generate code to submit your answer
 
-📋 After Submission - Generate question code only
+📋 Later - Generate question code only
 """
 
 send_answer_msg = """
-You can now send your answer! ✉️"""
+You can now send your answer! 📩 
+
+After you submit your answer, a question code will be generated."""
 
 after_code_msg = """
 Please paste this code into your question details 📋: \n\n 👉  {0} """
