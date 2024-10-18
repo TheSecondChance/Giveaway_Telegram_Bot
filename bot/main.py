@@ -371,7 +371,7 @@ def handle_giver_result(message, telegram_id):
     if response.headers.get('Content-Type') == 'application/pdf':
         pdf_file = io.BytesIO(response.content)
         pdf_file.seek(0) 
-        bot.send_document(chat_id=6296919002, document=pdf_file,
+        bot.send_document(telegram_id, document=pdf_file,
         visible_file_name='correct_answers.pdf',
         caption=f"Here are the correct answers for question {question_code} in PDF format."
         )
@@ -399,7 +399,7 @@ def handle_giver_result(message, telegram_id):
             btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
             inline_markup.row(btn1)
 
-            bot.send_message(chat_id=6296919002, text=f"Winers of question 👇 \n\n {question_code} 🥇🥇🥇",
+            bot.send_message(telegram_id, text=f"Winers of question 👇 \n\n {question_code} 🥇🥇🥇",
                              reply_markup=inline_markup)
     try:
         bot.delete_message(message.chat.id, message.message_id)
@@ -445,8 +445,7 @@ def insert_answer(message, userId=None):
         btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
         inline_markup.row(btn1)
         msg = _(insert_answer_msg, language)
-        bot.send_message(chat_id=6296919002, text=msg,
-                        reply_markup=inline_markup)
+        bot.send_message(userId, text=msg, reply_markup=inline_markup)
     else:
         msg = _(insert_msg, language)
         back_buttons(user, message, msg)
