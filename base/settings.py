@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,7 +27,8 @@ SECRET_KEY = 'django-insecure-_)s)*)_(l6+a*k92989dxelh&rehlzmvkxb1)ouryemm!bex5w
 DEBUG = True
 
 ALLOWED_HOSTS = ['8ce25521eba65f4ae51632fc07631afe.serveo.net',
-                 '127.0.0.1']
+                 '127.0.0.1',
+                 'giveaway.get-alpha.tech']
 
 
 # Application definition
@@ -120,6 +122,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
