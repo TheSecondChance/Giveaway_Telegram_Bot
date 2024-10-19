@@ -12,7 +12,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
+
+load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -24,11 +27,29 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-_)s)*)_(l6+a*k92989dxelh&rehlzmvkxb1)ouryemm!bex5w'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG')
 
-ALLOWED_HOSTS = ['8ce25521eba65f4ae51632fc07631afe.serveo.net',
-                 '127.0.0.1',
-                 'giveaway.get-alpha.tech']
+if DEBUG == True:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': os.environ.get('MYSQL_DATABASE_NAME'),
+            'USER': os.environ.get('MYSQL_DATABASE_USER'),
+            'PASSWORD': os.environ.get('MYSQL_DATABASE_PASSWORD'),
+            'HOST': os.environ.get('MYSQL_DATABASE_HOST'),
+            'PORT': os.environ.get('MYSQL_DATABASE_PORT', '3306'),  
+        }
+    }
+
+
+ALLOWED_HOSTS = ['127.0.0.1', 'giveaway.get-alpha.tech']
 
 
 # Application definition
@@ -75,16 +96,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'base.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
 
 
 # Password validation
