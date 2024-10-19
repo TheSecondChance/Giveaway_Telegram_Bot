@@ -46,7 +46,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = ['first_name',]
 
     def __str__(self) -> str:
-        return str(self.phone_number)
+        return f"{self.telegram_id} {self.user_name}"
 
 class GifterManager(BaseUserManager):
     def get_queryset(self) -> models.QuerySet:
