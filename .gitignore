@@ -169,6 +169,7 @@ cython_debug/
 # mine
 test_model.py
 request.py
+static
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
