@@ -119,9 +119,8 @@ def handle_shared_contact(message: types.Message):
 @bot.message_handler(commands=['start', 'restart']) 
 def start(message):
     user = get_user(telegram_id=message.chat.id)
-    if user is not None:
-        language = user.get('language', None)
     if user != None:
+        language = user.get('language', None)
         is_phone_exisit = user.get('phone_number')
         is_giver = user.get('is_gifter')
         is_taker = user.get('is_taker')
