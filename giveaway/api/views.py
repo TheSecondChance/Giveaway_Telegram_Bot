@@ -273,9 +273,10 @@ class AfterAnswerViewSet(RetrieveAPIView, UpdateAPIView):
 
 
 
-TELEGRAM_BOT_WEBHOOK_URL = "https://8ce25521eba65f4ae51632fc07631afe.serveo.net/api/web-hook"
+# TELEGRAM_BOT_WEBHOOK_URL = f"{os.getenv('BASE_URL')}api/web-hook"
+# TELEGRAM_BOT_WEBHOOK_URL = "https://giveaway.get-alpha.tech/api/web-hook"
 
 
-webhook_url = f'{TELEGRAM_BOT_WEBHOOK_URL}'
-bot.remove_webhook()
-bot.set_webhook(url=webhook_url)
+# webhook_url = f'{TELEGRAM_BOT_WEBHOOK_URL}'
+# bot.remove_webhook()
+# bot.set_webhook(url=webhook_url)
