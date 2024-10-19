@@ -18,12 +18,20 @@ start_msg = """
 
 choose_role = """🤔 Choose your role
 
+
+🎁 Give Reward - Award a prize for the correct answer.
+
+🧑‍💼 Get Reward - Answer the question and earn your reward!
+"""
+
+change_role_mgs = """🤔 Change your role
+
 ⚠️ Notice: Changing your role will result in losing your previous data.
 
 
-🎁 Giver - to switch to Giver 
+🎁 Give Reward - Award a prize for the correct answer.
 
-🧑‍💼 Taker - to switch to Taker
+🧑‍💼 Get Reward - Answer the question and earn your reward!
 """
 
 code_time_msg = """

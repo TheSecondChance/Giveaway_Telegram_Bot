@@ -143,8 +143,8 @@ def start(message):
 def chose_role(language, message):
     inline_markup = types.InlineKeyboardMarkup(row_width=2)
     welcome_msg = _(choose_role, language)
-    btn1 = types.InlineKeyboardButton(_("Giver 🎁", language), callback_data="giver")
-    btn2 = types.InlineKeyboardButton(_("Taker 🧑‍💼", language), callback_data="taker")
+    btn1 = types.InlineKeyboardButton(_("🎁 Give Reward", language), callback_data="giver")
+    btn2 = types.InlineKeyboardButton(_("🧑‍💼 Get Reward", language), callback_data="taker")
     btn3 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
     inline_markup.row(btn1, btn2)
     inline_markup.row(btn3)
