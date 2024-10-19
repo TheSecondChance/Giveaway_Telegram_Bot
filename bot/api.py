@@ -1,12 +1,16 @@
+import os
 import logging
 import requests
+from dotenv import load_dotenv
 from rest_framework import status
 from rest_framework.response import Response
 from typing import Optional, Dict, Any
 
 
 logging.basicConfig(filename='bot.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-BASE_URL = 'http://127.0.0.1:8000/'
+load_dotenv()
+
+BASE_URL = os.getenv('BASE_URL')
 
 def status(status):
     pass
