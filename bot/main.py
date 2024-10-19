@@ -41,10 +41,11 @@ def handle_language_selection(call: types.CallbackQuery):
     user = call.from_user
     response = get_user(telegram_id=user.id)
     if response != None:
-        update_user(telegram_id=user.id, updated_data={"language": call.data})
+        update_user(telegram_id=user.id, updated_data={"language": call.data, "first_name": user.first_name})
         language = response.get('language')
     else:
         data = {
+            "first_name": user.first_name,
             "telegram_id": user.id,
             "user_name": user.username,
             "language": call.data
