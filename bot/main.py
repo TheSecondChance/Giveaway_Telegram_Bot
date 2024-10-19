@@ -11,7 +11,8 @@ from telebot import types
 from dotenv import load_dotenv
 from .messages import *
 from .translations import translate as _
-from .settings import user_settings, change_language, delete_account, delete_account_yes
+from .settings import (user_settings, change_language, delete_account, 
+                       delete_account_yes, change_role)
 
 
 load_dotenv()
@@ -274,7 +275,7 @@ def handle_call_back(callback):
             change_language(language, callback.message, bot=bot)
 
         if command == "change_role":
-            chose_role(language ,callback.message)
+            change_role(language ,callback.message, bot=bot)
  
         if command == "taker_home":
             taker_welcome(callback.message, userId=telegram_id)
