@@ -85,3 +85,5 @@ taker_msg = """
 """
 
 answer_msg = "You can now send your answer 📩"
+
+choose_result_mgs = "🎯 Choose the result type"

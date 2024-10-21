@@ -191,7 +191,8 @@ def handle_call_back(callback):
             btn3 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
             inline_markup.row(btn1, btn2)
             inline_markup.row(btn3)
-            bot.send_message(callback.message.chat.id, text=_("Choose the result type", language), reply_markup=inline_markup)
+            msg = _(choose_result_mgs, language)
+            bot.send_message(callback.message.chat.id, text=msg, reply_markup=inline_markup)
 
         if command == "first_three":
             telegram_id = callback.from_user.id
