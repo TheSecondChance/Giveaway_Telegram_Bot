@@ -311,9 +311,8 @@ def handle_question_answer(message, telegram_id):
     language = user.get('language', None)
     copy_code = f"`{question_code}`"
     msg = f"Answer Received ✅ \n\nPlease past this code on you question details 👇\n\n {copy_code} "
-    btn1 = types.InlineKeyboardButton(_("Home 🏠", language), callback_data="home")
-    btn2 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="back")
-    inline_markup.row(btn1, btn2)
+    btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
+    inline_markup.row(btn1)
     bot.send_message(message.chat.id, text=msg, reply_markup=inline_markup, parse_mode="Markdown")
     try:
         bot.delete_message(message.chat.id, message.message_id)
