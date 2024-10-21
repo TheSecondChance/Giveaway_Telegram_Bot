@@ -84,6 +84,10 @@ class Answer(models.Model):
     question_code = models.ForeignKey(Question, on_delete=models.CASCADE)
     answer_text = models.TextField(blank=True, null=True)
     is_correct = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
 
     def __str__(self) -> str:
         return f"by {self.taker} to {self.question_code}"
