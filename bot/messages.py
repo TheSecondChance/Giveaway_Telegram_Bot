@@ -87,3 +87,15 @@ taker_msg = """
 answer_msg = "You can now send your answer 📩"
 
 choose_result_mgs = "🎯 Choose the result type"
+
+is_digit_msg = "🔢 Please enter question code to get result"
+
+pdf_msg = "Here are the correct answers for question {0} in PDF format."
+
+no_question = "❌ No question found with the provided question_code"
+
+no_correct_answer = "😢 There is no correct answer"
+
+winers_msg = "🎉 Winners of the question {0} 👇 \n\n  🥇🥇🥇"
+
+winers_chat_msg = "🎁 Click to send a gift for {0}"

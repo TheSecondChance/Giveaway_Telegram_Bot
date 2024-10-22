@@ -206,7 +206,7 @@ def handle_call_back(callback):
             msg = _(result_msg, language)
             bot.send_message(callback.message.chat.id, msg)
             bot.register_next_step_handler(
-                callback.message, handle_giver_result, telegram_id=telegram_id)
+                callback.message, handle_all_giver_result, telegram_id=telegram_id)
 
         if command == "after":
             user = get_user(telegram_id=telegram_id)
@@ -320,32 +320,33 @@ def handle_question_answer(message, telegram_id):
     except telebot.apihelper.ApiTelegramException as e:
         print(f"Failed welcome to delete message {message.message_id}: {e}")
 
-def handle_giver_result(message, telegram_id):
+def handle_all_giver_result(message, telegram_id):
     user = get_user(telegram_id=telegram_id)
     question_code = message.text
     telegram_id = message.from_user.id
     language = user.get('language', None)
     if question_code.isdigit() == False:
-        welcome_msg = "Please enter question code to get result"
-        bot.send_message(message.chat.id, text=welcome_msg)
+        msg = _(is_digit_msg, language)
+        bot.send_message(message.chat.id, text=msg)
         return
     response = giver_result(telegram_id=telegram_id, question_code=question_code)
     if response.headers.get('Content-Type') == 'application/pdf':
         pdf_file = io.BytesIO(response.content)
-        pdf_file.seek(0) 
+        pdf_file.seek(0)
+        msg = _(pdf_msg, language)
         bot.send_document(telegram_id, document=pdf_file,
         visible_file_name='correct_answers.pdf',
-        caption=f"Here are the correct answers for question {question_code} in PDF format."
+        caption=msg.format(question_code)
         )
     else:
         response = response.json()
         if response.get('status') == 404:
-            welcome_msg = "No question found with the provided question_code"
-            back_buttons(user, message, welcome_msg)
+            msg = _(no_question, language)
+            back_buttons(user, message, msg)
             return
         correct_answers = response.get('correct_answers', [])
         if not correct_answers:
-            welcome_msg = "There is no correct answer 😢 \n\n"
+            msg = _(no_correct_answer, language)
         else:
             inline_markup = types.InlineKeyboardMarkup(row_width=2)
             valid_users = []
@@ -355,13 +356,16 @@ def handle_giver_result(message, telegram_id):
                 if user_exists(taker_id, bot_send):
                     valid_users.append(taker_id)
             for valid_user in valid_users:
-                button = types.InlineKeyboardButton(text="Click to send a givet 💬", url=f"tg://user?id={valid_user}")
+                user = bot.get_chat(valid_user)
+                first_name = user.first_name
+                click_msg = _(winers_chat_msg, language)
+                button = types.InlineKeyboardButton(text=f"{click_msg}".format(first_name), url=f"tg://user?id={valid_user}")
                 inline_markup.add(button)
 
             btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
             inline_markup.row(btn1)
-
-            bot.send_message(telegram_id, text=f"Winers of question 👇 \n\n {question_code} 🥇🥇🥇",
+            msg = _(winers_msg, language)
+            bot.send_message(telegram_id, text=f"{msg}".format(question_code),
                              reply_markup=inline_markup)
     try:
         bot.delete_message(message.chat.id, message.message_id)
@@ -374,19 +378,19 @@ def handle_first_three_result(message, telegram_id):
     telegram_id = message.from_user.id
     language = user.get('language', None)
     if question_code.isdigit() == False:
-        welcome_msg = "Please enter question code to get result"
-        bot.send_message(message.chat.id, text=welcome_msg)
+        msg = _(is_digit_msg, language)
+        bot.send_message(message.chat.id, text=msg)
         return
     response = giver_result(telegram_id=telegram_id, question_code=question_code)
     response = response.json()
     if response.get('status') == 404:
-        welcome_msg = "No question found with the provided question_code"
-        back_buttons(user, message, welcome_msg)
+        msg = _(no_question, language)
+        back_buttons(user, message, msg)
         return
     correct_answers = response.get('correct_answers', [])
     first_three_answer = correct_answers[:3]
     if not correct_answers:
-        welcome_msg = "There is no correct answer 😢 \n\n"
+        msg = _(no_correct_answer, language)
     else:
         inline_markup = types.InlineKeyboardMarkup(row_width=2)
         valid_users = []
@@ -396,13 +400,15 @@ def handle_first_three_result(message, telegram_id):
             if user_exists(taker_id, bot_send):
                 valid_users.append(taker_id)
         for valid_user in valid_users:
-            button = types.InlineKeyboardButton(text="Click to send a givet 💬", url=f"tg://user?id={valid_user}")
+            user = bot.get_chat(valid_user)
+            first_name = user.first_name
+            click_msg = _(winers_chat_msg, language)
+            button = types.InlineKeyboardButton(text=f"{click_msg}".format(first_name), url=f"tg://user?id={valid_user}")
             inline_markup.add(button)
-
         btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
         inline_markup.row(btn1)
-
-        bot.send_message(telegram_id, text=f"Winers of question 👇 \n\n {question_code} 🥇🥇🥇",
+        msg = _(winers_msg, language)
+        bot.send_message(telegram_id, text=f"{msg}".format(question_code),
                             reply_markup=inline_markup)
     try:
         bot.delete_message(message.chat.id, message.message_id)
