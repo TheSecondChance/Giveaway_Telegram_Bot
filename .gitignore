@@ -170,6 +170,7 @@ cython_debug/
 test_model.py
 request.py
 static
+giveaway/migrations
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
