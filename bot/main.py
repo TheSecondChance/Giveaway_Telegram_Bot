@@ -2,6 +2,7 @@ import os
 import io
 import re
 import time
+import logging
 import telebot
 from .api import (get_user, create_user, update_user, create_question,
                  create_answer, giver_result, user_exists,
@@ -14,7 +15,7 @@ from .translations import translate as _
 from .settings import (user_settings, change_language, delete_account, 
                        delete_account_yes, change_role)
 
-
+logging.basicConfig(filename='main.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 load_dotenv()
 
 BOT_TOKEN = os.getenv('BOT_TOKEN')
@@ -200,19 +201,40 @@ def handle_call_back(callback):
             msg = _(choose_result_mgs, language)
             bot.send_message(callback.message.chat.id, text=msg, reply_markup=inline_markup)
 
+            try:
+                bot.delete_message(callback.message.chat.id, callback.message.message_id)
+            except telebot.apihelper.ApiTelegramException as e:
+                logging.error(f"Failed Message delete: chose_result_giver  {callback.message.message_id}: {e}")
+
         if command == "first_three":
             telegram_id = callback.from_user.id
             msg = _(result_msg, language)
-            bot.send_message(callback.message.chat.id, msg)
+            inline_markup = types.InlineKeyboardMarkup(row_width=2)
+            btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
+            inline_markup.row(btn1)
+            send_fmsg = bot.send_message(callback.message.chat.id, text=msg, reply_markup=inline_markup)
             bot.register_next_step_handler(
                 callback.message, handle_first_three_result, telegram_id=telegram_id)
+            try:
+                bot.delete_message(callback.message.chat.id, callback.message.message_id)
+            except telebot.apihelper.ApiTelegramException as e:
+                logging.error(f"Failed Message delete: chose_result_giver  {callback.message.message_id}: {e}")
+            threading.Thread(target=delete_message_after_delay, args=(callback.message.chat.id, send_fmsg.message_id, 20)).start()
 
         if command == "all_results":
             telegram_id = callback.from_user.id
             msg = _(result_msg, language)
-            bot.send_message(callback.message.chat.id, msg)
+            inline_markup = types.InlineKeyboardMarkup(row_width=2)
+            btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
+            inline_markup.row(btn1)
+            send_msg = bot.send_message(callback.message.chat.id, text=msg, reply_markup=inline_markup)
             bot.register_next_step_handler(
                 callback.message, handle_all_giver_result, telegram_id=telegram_id)
+            try:
+                bot.delete_message(callback.message.chat.id, callback.message.message_id)
+            except telebot.apihelper.ApiTelegramException as e:
+                logging.error(f"Failed Message delete: chose_result_giver  {callback.message.message_id}: {e}")
+            threading.Thread(target=delete_message_after_delay, args=(callback.message.chat.id, send_msg.message_id, 20)).start()
 
         if command == "after":
             user = get_user(telegram_id=telegram_id)
@@ -353,7 +375,7 @@ def handle_all_giver_result(message, telegram_id):
         response = response.json()
         if response.get('status') == 404:
             msg = _(no_question, language)
-            back_buttons(user, message, msg)
+            back_buttons(language, message, msg)
             return
         correct_answers = response.get('correct_answers', [])
         if not correct_answers:
@@ -396,7 +418,7 @@ def handle_first_three_result(message, telegram_id):
     response = response.json()
     if response.get('status') == 404:
         msg = _(no_question, language)
-        back_buttons(user, message, msg)
+        back_buttons(language, message, msg)
         return
     correct_answers = response.get('correct_answers', [])
     first_three_answer = correct_answers[:3]
@@ -443,12 +465,11 @@ def question_answer_time(message, userId=None):
     except telebot.apihelper.ApiTelegramException as e:
         print(f"Failed welcome to delete message {message.message_id}: {e}")
 
-def back_buttons(user, message, welcome_msg):
+def back_buttons(language, message, msg):
     inline_markup = types.InlineKeyboardMarkup(row_width=2)
-    language = user.get('language', None)
     btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
     inline_markup.row(btn1)
-    bot.send_message(message.chat.id, text=welcome_msg, reply_markup=inline_markup)
+    bot.send_message(message.chat.id, text=msg, reply_markup=inline_markup)
 
 def insert_answer(message, userId=None):
     user = get_user(telegram_id=userId)
@@ -468,7 +489,7 @@ def insert_answer(message, userId=None):
         bot.send_message(userId, text=msg, reply_markup=inline_markup)
     else:
         msg = _(insert_msg, language)
-        back_buttons(user, message, msg)
+        back_buttons(language, message, msg)
     try:
         bot.delete_message(message.chat.id, message.message_id)
     except telebot.apihelper.ApiTelegramException as e:
