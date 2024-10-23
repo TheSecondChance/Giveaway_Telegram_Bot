@@ -214,12 +214,11 @@ def handle_call_back(callback):
             inline_markup.row(btn1)
             send_fmsg = bot.send_message(callback.message.chat.id, text=msg, reply_markup=inline_markup)
             bot.register_next_step_handler(
-                callback.message, handle_first_three_result, telegram_id=telegram_id)
+                callback.message, handle_first_three_result, telegram_id=telegram_id, delete_msg=send_fmsg.message_id)
             try:
                 bot.delete_message(callback.message.chat.id, callback.message.message_id)
             except telebot.apihelper.ApiTelegramException as e:
                 logging.error(f"Failed Message delete: chose_result_giver  {callback.message.message_id}: {e}")
-            threading.Thread(target=delete_message_after_delay, args=(callback.message.chat.id, send_fmsg.message_id, 20)).start()
 
         if command == "all_results":
             telegram_id = callback.from_user.id
@@ -234,7 +233,6 @@ def handle_call_back(callback):
                 bot.delete_message(callback.message.chat.id, callback.message.message_id)
             except telebot.apihelper.ApiTelegramException as e:
                 logging.error(f"Failed Message delete: chose_result_giver  {callback.message.message_id}: {e}")
-            # threading.Thread(target=delete_message_after_delay, args=(callback.message.chat.id, send_msg.message_id, 20)).start()
 
         if command == "after":
             user = get_user(telegram_id=telegram_id)
@@ -410,7 +408,7 @@ def handle_all_giver_result(message, telegram_id, delete_msg):
     except telebot.apihelper.ApiTelegramException as e:
         print(f"Failed welcome to delete message {message.message_id}: {e}")
 
-def handle_first_three_result(message, telegram_id):
+def handle_first_three_result(message, telegram_id, delete_msg):
     user = get_user(telegram_id=telegram_id)
     question_code = message.text
     telegram_id = message.from_user.id
@@ -448,6 +446,10 @@ def handle_first_three_result(message, telegram_id):
         msg = _(winers_msg, language)
         bot.send_message(telegram_id, text=f"{msg}".format(question_code),
                             reply_markup=inline_markup)
+    try:
+        bot.delete_message(message.chat.id, delete_msg)
+    except telebot.apihelper.ApiTelegramException as e:
+        logging.error(f"Failed welcome to delete message {delete_msg}: {e}")
     try:
         bot.delete_message(message.chat.id, message.message_id)
     except telebot.apihelper.ApiTelegramException as e:
