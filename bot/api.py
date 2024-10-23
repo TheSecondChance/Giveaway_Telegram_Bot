@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from typing import Optional, Dict, Any
 
 
-logging.basicConfig(filename='bot.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename='api.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 load_dotenv()
 
 BASE_URL = os.getenv('BASE_URL')
