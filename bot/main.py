@@ -175,10 +175,16 @@ def handle_call_back(callback):
             question_answer_time(callback.message, userId=telegram_id)
 
         if command == "now":
+            try:
+                bot.delete_message(callback.message.chat.id, callback.message.message_id)
+            except telebot.apihelper.ApiTelegramException as e:
+                print(f"Failed Know Message to delete message {callback.message.message_id}: {e}")
             msg = _(send_answer_msg, language)
-            bot.send_message(callback.message.chat.id, msg)
+            send_answer = bot.send_message(callback.message.chat.id, msg)
             bot.register_next_step_handler(
                 callback.message, handle_question_answer, telegram_id=telegram_id)
+
+            threading.Thread(target=delete_message_after_delay, args=(callback.message.chat.id, send_answer.message_id, 20)).start()
 
         if command == "home":
             start(callback.message)
@@ -231,6 +237,11 @@ def handle_call_back(callback):
             bot.send_message(callback.message.chat.id, msg)
             bot.register_next_step_handler(
                 callback.message, handle_taker_answer, telegram_id=telegram_id)
+            try:
+                bot.delete_message(callback.message.chat.id, callback.message.message_id)
+                print("Deleted message sldkfjsdlkfsjd sldkfjs")
+            except telebot.apihelper.ApiTelegramException as e:
+                print(f"Failed Know Message to delete message {callback.message.message_id}: {e}")
 
         if command == "settings":
             user_settings(user=user, message=callback.message, bot=bot)
