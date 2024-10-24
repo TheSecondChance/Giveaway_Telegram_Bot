@@ -120,7 +120,7 @@ def Giver_welcome(message, userId=None):
     inline_markup.row(btn5, btn3)
     inline_markup.row(btn4)
 
-    with open('./Assets/welcome_dr.png', 'rb') as photo:
+    with open('./Assets/welcome.png', 'rb') as photo:
         bot.send_photo(message.chat.id, photo, caption=msg, reply_markup=inline_markup)
     try:
         bot.delete_message(message.chat.id, message.message_id)
@@ -141,7 +141,7 @@ def taker_welcome(message, userId=None):
     inline_markup.row(btn1, btn2)
     inline_markup.row(btn3)
 
-    with open('./Assets/welcome_dr.png', 'rb') as photo:
+    with open('./Assets/welcome.png', 'rb') as photo:
         bot.send_photo(message.chat.id, photo, caption=msg, reply_markup=inline_markup)
     try:
         bot.delete_message(message.chat.id, message.message_id)
