@@ -213,8 +213,9 @@ def handle_call_back(callback):
             btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
             inline_markup.row(btn1)
             send_fmsg = bot.send_message(callback.message.chat.id, text=msg, reply_markup=inline_markup)
-            bot.register_next_step_handler(
-                callback.message, handle_first_three_result, telegram_id=telegram_id, delete_msg=send_fmsg.message_id)
+            bot.register_next_step_handler_by_chat_id(
+                callback.message.chat.id, handle_first_three_result,
+                telegram_id=telegram_id, delete_msg=send_fmsg.message_id)
             try:
                 bot.delete_message(callback.message.chat.id, callback.message.message_id)
             except telebot.apihelper.ApiTelegramException as e:
@@ -227,8 +228,9 @@ def handle_call_back(callback):
             btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
             inline_markup.row(btn1)
             send_msg = bot.send_message(callback.message.chat.id, text=msg, reply_markup=inline_markup)
-            bot.register_next_step_handler(
-                callback.message, handle_all_giver_result, telegram_id=telegram_id, delete_msg=send_msg.message_id)
+            bot.register_next_step_handler_by_chat_id(
+                callback.message.chat.id, handle_all_giver_result,
+                telegram_id=telegram_id, delete_msg=send_msg.message_id)
             try:
                 bot.delete_message(callback.message.chat.id, callback.message.message_id)
             except telebot.apihelper.ApiTelegramException as e:
