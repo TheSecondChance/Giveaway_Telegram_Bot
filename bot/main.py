@@ -257,9 +257,9 @@ def handle_call_back(callback):
             inline_markup = types.InlineKeyboardMarkup(row_width=2)
             btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
             inline_markup.row(btn1)
-            bot.send_message(callback.message.chat.id, msg, reply_markup=inline_markup)
+            send_msg = bot.send_message(callback.message.chat.id, msg, reply_markup=inline_markup)
             bot.register_next_step_handler(
-                callback.message, handle_taker_answer, telegram_id=telegram_id)
+                callback.message, handle_taker_answer, telegram_id=telegram_id, delete_msg=send_msg.message_id)
             try:
                 bot.delete_message(callback.message.chat.id, callback.message.message_id)
             except telebot.apihelper.ApiTelegramException as e:
@@ -311,7 +311,7 @@ def handle_call_back(callback):
     else:
         start(callback.message)
 
-def handle_taker_answer(message, telegram_id):
+def handle_taker_answer(message, telegram_id, delete_msg):
     user = get_user(telegram_id=telegram_id)
     telegram_id = message.from_user.id
     message_text = message.text.strip()
@@ -344,6 +344,14 @@ def handle_taker_answer(message, telegram_id):
     btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="taker_home")
     inline_markup.row(btn1)
     bot.send_message(message.chat.id, text=welcome_msg, reply_markup=inline_markup)
+    try:
+        bot.delete_message(message.chat.id, delete_msg)
+    except telebot.apihelper.ApiTelegramException as e:
+        print(f"Failed welcome to delete message {delete_msg}: {e}")
+    try:
+        bot.delete_message(message.chat.id, message.message_id)
+    except telebot.apihelper.ApiTelegramException as e:
+        print(f"Failed welcome to delete message {message.message_id}: {e}")
 
 def handle_question_answer(message, telegram_id):
     user = get_user(telegram_id=telegram_id)
