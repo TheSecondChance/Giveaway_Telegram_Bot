@@ -105,3 +105,5 @@ winers_chat_msg = "🎁 Click to send a gift for {0}"
 send_after_answer = "you can now send your answer for question 👉 {0}"
 
 answer_received_msg = "✅ Answer Received for question 👉 {0}"
+
+how_to_work_msg = "⏳ Please hold on while we update the instructions on how everything works!"

@@ -115,10 +115,11 @@ def Giver_welcome(message, userId=None):
     btn2 = types.InlineKeyboardButton(_("Result 🧧", language), callback_data="chose_result_giver")
     btn5 = types.InlineKeyboardButton(_("Insert Answer ✏️", language), callback_data="insert_answer")
     btn3 = types.InlineKeyboardButton(_("Settings ⚙️", language), callback_data="settings")
+    btn6 = types.InlineKeyboardButton(_("How to work ⚒️", language), callback_data="how_to_work")
     btn4 = types.InlineKeyboardButton(_("Invite Friends 🤝", language), switch_inline_query="invite")
     inline_markup.row(btn1, btn2)
     inline_markup.row(btn5, btn3)
-    inline_markup.row(btn4)
+    inline_markup.row(btn6, btn4)
 
     with open('./Assets/welcome.png', 'rb') as photo:
         bot.send_photo(message.chat.id, photo, caption=msg, reply_markup=inline_markup)
@@ -310,6 +311,17 @@ def handle_call_back(callback):
         if command == "delete_yes":
             delete_successfull_msg = delete_account_yes(user=user, message=callback.message, bot=bot, userId=telegram_id)
             threading.Thread(target=delete_message_after_delay, args=(callback.message.chat.id, delete_successfull_msg, 4)).start()
+        
+        if command == "how_to_work":
+            inline_markup = types.InlineKeyboardMarkup(row_width=2)
+            btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
+            inline_markup.row(btn1)
+            msg = _(how_to_work_msg, language)
+            bot.send_message(callback.message.chat.id, msg, reply_markup=inline_markup)
+            try:
+                bot.delete_message(callback.message.chat.id, callback.message.message_id)
+            except telebot.apihelper.ApiTelegramException as e:
+                logging.error(f"Failed Message delete: how_to_work {callback.message.message_id}: {e}")
     else:
         start(callback.message)
 
