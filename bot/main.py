@@ -287,9 +287,10 @@ def handle_call_back(callback):
             inline_markup = types.InlineKeyboardMarkup(row_width=2)
             btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
             inline_markup.row(btn1)
+            msg = _(send_after_answer, language)
             send_msg = bot.send_message(callback.message.chat.id,
-                            f"you can now send your answer for 👉 {question_code}",
-                            reply_markup=inline_markup)
+                                        text=f"{msg}".format(question_code),
+                                        reply_markup=inline_markup)
             bot.register_next_step_handler(
                 callback.message, update_question_answer, telegram_id=telegram_id,
                 question_code=question_code, delete_msg=send_msg.message_id)

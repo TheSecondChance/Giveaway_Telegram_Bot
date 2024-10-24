@@ -99,3 +99,5 @@ no_correct_answer = "😢 There is no correct answer"
 winers_msg = "🎉 Winners of the question {0} 👇 \n\n  🥇🥇🥇"
 
 winers_chat_msg = "🎁 Click to send a gift for {0}"
+
+send_after_answer = "you can now send your answer for question 👉 {0}"
