@@ -418,7 +418,7 @@ def handle_all_giver_result(message, telegram_id, delete_msg):
 
             btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
             inline_markup.row(btn1)
-            msg = _(winers_msg, language)
+            msg = _(all_winers_msg, language)
             bot.send_message(telegram_id, text=f"{msg}".format(question_code),
                              reply_markup=inline_markup)
     try:

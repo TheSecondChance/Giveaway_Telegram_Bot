@@ -96,7 +96,9 @@ no_question = "❌ No question found with the provided question_code"
 
 no_correct_answer = "😢 There is no correct answer"
 
-winers_msg = "🎉 Winners of the question {0} 👇 \n\n  🥇🥇🥇"
+winers_msg = "🎉 Winners of the question {0} 👇 \n\n  🥇🥈🥉"
+
+all_winers_msg = "🎉 Winners of the question {0} 👇 \n\n"
 
 winers_chat_msg = "🎁 Click to send a gift for {0}"
 
