@@ -536,11 +536,11 @@ def update_question_answer(message, telegram_id, question_code, delete_msg):
     question_code = question_code
     inline_markup = types.InlineKeyboardMarkup(row_width=2)
     language = user.get('language', None)
-    welcome_msg = f"Answer Received ✅ for question {question_code}\n\n\n\n "
+    msg = _(answer_received_msg, language)
     btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
     inline_markup.row(btn1)
 
-    bot.send_photo(message.chat.id, WELCOME_IMAGE, caption=welcome_msg, reply_markup=inline_markup, parse_mode="Markdown")
+    bot.send_message(message.chat.id, text=msg, reply_markup=inline_markup, parse_mode="Markdown")
 
     try:
         bot.delete_message(message.chat.id, delete_msg)
