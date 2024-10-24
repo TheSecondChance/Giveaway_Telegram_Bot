@@ -296,8 +296,8 @@ def handle_call_back(callback):
             send_msg = bot.send_message(callback.message.chat.id,
                                         text=f"{msg}".format(question_code),
                                         reply_markup=inline_markup)
-            bot.register_next_step_handler(
-                callback.message, update_question_answer, telegram_id=telegram_id,
+            bot.register_next_step_handler_by_chat_id(
+                callback.message.chat.id, update_question_answer, telegram_id=telegram_id,
                 question_code=question_code, delete_msg=send_msg.message_id)
             try:
                 bot.delete_message(callback.message.chat.id, callback.message.message_id)
