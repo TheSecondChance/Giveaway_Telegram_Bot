@@ -25,6 +25,10 @@ def change_language(language, message, bot):
     btn2 = types.InlineKeyboardButton("አማርኛ", callback_data="amharic")
     markup.add(btn1, btn2)
     bot.send_message(message.chat.id, text=msg, reply_markup=markup)
+    try:
+        bot.delete_message(message.chat.id, message.message_id)
+    except telebot.apihelper.ApiTelegramException as e:
+        print(f"Failed chose to delete message {message.message_id}: {e}")
 
 def delete_account(language, message, bot):
     inline_markup = types.InlineKeyboardMarkup(row_width=2)
