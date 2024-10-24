@@ -303,7 +303,8 @@ def handle_call_back(callback):
             delete_account(language, message=callback.message, bot=bot)
 
         if command == "delete_yes":
-            delete_account_yes(user=user, message=callback.message, bot=bot, userId=telegram_id)
+            delete_successfull_msg = delete_account_yes(user=user, message=callback.message, bot=bot, userId=telegram_id)
+            threading.Thread(target=delete_message_after_delay, args=(callback.message.chat.id, delete_successfull_msg, 4)).start()
     else:
         start(callback.message)
 

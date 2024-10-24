@@ -47,7 +47,13 @@ def delete_account_yes(user, message, bot, userId):
     language = user.get('language', None)
     delete_account_api(telegram_id=userId)
     msg = _(delete_mgs, language)
-    bot.send_message(message.chat.id, text=msg)
+    send_msg = bot.send_message(message.chat.id, text=msg)
+    try:
+        bot.delete_message(message.chat.id, message.message_id)
+    except telebot.apihelper.ApiTelegramException as e:
+        print(f"Failed chose to delete message {message.message_id}: {e}")
+    return send_msg.message_id
+
 
 def change_role(language, message, bot):
     inline_markup = types.InlineKeyboardMarkup(row_width=2)
