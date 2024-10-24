@@ -259,7 +259,6 @@ def handle_call_back(callback):
                 callback.message, handle_taker_answer, telegram_id=telegram_id)
             try:
                 bot.delete_message(callback.message.chat.id, callback.message.message_id)
-                print("Deleted message sldkfjsdlkfsjd sldkfjs")
             except telebot.apihelper.ApiTelegramException as e:
                 print(f"Failed Know Message to delete message {callback.message.message_id}: {e}")
 
@@ -285,12 +284,19 @@ def handle_call_back(callback):
         if command.isdigit():
             question_code = command
             user = get_user(telegram_id=telegram_id)
-
-            bot.send_message(callback.message.chat.id,
-                            f"you can now send your answer for 👉 {question_code}" )
+            inline_markup = types.InlineKeyboardMarkup(row_width=2)
+            btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
+            inline_markup.row(btn1)
+            send_msg = bot.send_message(callback.message.chat.id,
+                            f"you can now send your answer for 👉 {question_code}",
+                            reply_markup=inline_markup)
             bot.register_next_step_handler(
                 callback.message, update_question_answer, telegram_id=telegram_id,
-                question_code=question_code)
+                question_code=question_code, delete_msg=send_msg.message_id)
+            try:
+                bot.delete_message(callback.message.chat.id, callback.message.message_id)
+            except telebot.apihelper.ApiTelegramException as e:
+                logging.error(f"Failed Message delete: command.isdigit {callback.message.message_id}: {e}")
             
         if command == "delete_account":
             delete_account(language, message=callback.message, bot=bot)
@@ -506,7 +512,7 @@ def insert_answer(message, userId=None):
     except telebot.apihelper.ApiTelegramException as e:
         print(f"Failed welcome to delete message {message.message_id}: {e}")
 
-def update_question_answer(message, telegram_id, question_code):
+def update_question_answer(message, telegram_id, question_code, delete_msg):
     user = get_user(telegram_id=telegram_id)
     answer = message.text
     telegram_id = message.chat.id
@@ -522,6 +528,11 @@ def update_question_answer(message, telegram_id, question_code):
     inline_markup.row(btn1)
 
     bot.send_photo(message.chat.id, WELCOME_IMAGE, caption=welcome_msg, reply_markup=inline_markup, parse_mode="Markdown")
+
+    try:
+        bot.delete_message(message.chat.id, delete_msg)
+    except telebot.apihelper.ApiTelegramException as e:
+        logging.error(f"Failed welcome to delete message {delete_msg}: {e}")
     try:
         bot.delete_message(message.chat.id, message.message_id)
     except telebot.apihelper.ApiTelegramException as e:
