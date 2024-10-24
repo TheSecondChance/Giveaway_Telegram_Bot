@@ -265,6 +265,10 @@ def handle_call_back(callback):
 
         if command == "settings":
             user_settings(user=user, message=callback.message, bot=bot)
+            try:
+                bot.delete_message(callback.message.chat.id, callback.message.message_id)
+            except telebot.apihelper.ApiTelegramException as e:
+                logging.error(f"Failed Message delete: settings  {callback.message.message_id}: {e}")
 
         if command == "change_lang":
             change_language(language, callback.message, bot=bot)
