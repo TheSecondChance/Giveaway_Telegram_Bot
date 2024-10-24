@@ -533,14 +533,13 @@ def update_question_answer(message, telegram_id, question_code, delete_msg):
         'correct_answer': answer,
     }
     update_after_answer(telegram_id=telegram_id, question_code=question_code, updated_data=data)
-    question_code = question_code
     inline_markup = types.InlineKeyboardMarkup(row_width=2)
     language = user.get('language', None)
     msg = _(answer_received_msg, language)
     btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
     inline_markup.row(btn1)
 
-    bot.send_message(message.chat.id, text=msg, reply_markup=inline_markup, parse_mode="Markdown")
+    bot.send_message(message.chat.id, text=f"{msg}".format(question_code), reply_markup=inline_markup, parse_mode="Markdown")
 
     try:
         bot.delete_message(message.chat.id, delete_msg)
