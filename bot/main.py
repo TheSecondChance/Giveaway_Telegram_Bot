@@ -383,10 +383,10 @@ def handle_question_answer(message, telegram_id):
     inline_markup = types.InlineKeyboardMarkup(row_width=2)
     language = user.get('language', None)
     copy_code = f"`{question_code}`"
-    msg = f"Answer Received ✅ \n\nPlease past this code on you question details 👇\n\n {copy_code} "
+    msg = _(now_answer_msg, language)
     btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
     inline_markup.row(btn1)
-    bot.send_message(message.chat.id, text=msg, reply_markup=inline_markup, parse_mode="Markdown")
+    bot.send_message(message.chat.id, text=msg.format(copy_code), reply_markup=inline_markup, parse_mode="Markdown")
     try:
         bot.delete_message(message.chat.id, message.message_id)
     except telebot.apihelper.ApiTelegramException as e:

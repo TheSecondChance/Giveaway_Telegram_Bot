@@ -107,3 +107,5 @@ send_after_answer = "you can now send your answer for question 👉 {0}"
 answer_received_msg = "✅ Answer Received for question 👉 {0}"
 
 how_to_work_msg = "⏳ Please hold on while we update the instructions on how everything works!"
+
+now_answer_msg = f"Answer Received ✅ \n\nPlease past this code on you question details 👇\n\n {0} "
