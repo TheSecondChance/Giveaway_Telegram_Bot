@@ -178,16 +178,17 @@ def handle_call_back(callback):
             question_answer_time(callback.message, userId=telegram_id)
 
         if command == "now":
+            inline_markup = types.InlineKeyboardMarkup(row_width=2)
+            btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="back")
+            inline_markup.row(btn1)
+            msg = _(send_answer_msg, language)
+            send_answer = bot.send_message(callback.message.chat.id, msg, reply_markup=inline_markup)
+            bot.register_next_step_handler(
+                callback.message, handle_question_answer, telegram_id=telegram_id, delete_msg=send_answer.message_id)
             try:
                 bot.delete_message(callback.message.chat.id, callback.message.message_id)
             except telebot.apihelper.ApiTelegramException as e:
-                print(f"Failed Know Message to delete message {callback.message.message_id}: {e}")
-            msg = _(send_answer_msg, language)
-            send_answer = bot.send_message(callback.message.chat.id, msg)
-            bot.register_next_step_handler(
-                callback.message, handle_question_answer, telegram_id=telegram_id)
-
-            threading.Thread(target=delete_message_after_delay, args=(callback.message.chat.id, send_answer.message_id, 20)).start()
+                print(f"Failed Now Message to delete message {callback.message.message_id}: {e}")
 
         if command == "home":
             start(callback.message)
@@ -212,7 +213,7 @@ def handle_call_back(callback):
             telegram_id = callback.from_user.id
             msg = _(result_msg, language)
             inline_markup = types.InlineKeyboardMarkup(row_width=2)
-            btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
+            btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="back")
             inline_markup.row(btn1)
             send_fmsg = bot.send_message(callback.message.chat.id, text=msg, reply_markup=inline_markup)
             bot.register_next_step_handler_by_chat_id(
@@ -227,7 +228,7 @@ def handle_call_back(callback):
             telegram_id = callback.from_user.id
             msg = _(result_msg, language)
             inline_markup = types.InlineKeyboardMarkup(row_width=2)
-            btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
+            btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="back")
             inline_markup.row(btn1)
             send_msg = bot.send_message(callback.message.chat.id, text=msg, reply_markup=inline_markup)
             bot.register_next_step_handler_by_chat_id(
@@ -259,7 +260,7 @@ def handle_call_back(callback):
         if command == "answer":
             msg = _(answer_msg, language)
             inline_markup = types.InlineKeyboardMarkup(row_width=2)
-            btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
+            btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="back")
             inline_markup.row(btn1)
             send_msg = bot.send_message(callback.message.chat.id, msg, reply_markup=inline_markup)
             bot.register_next_step_handler(
@@ -293,7 +294,7 @@ def handle_call_back(callback):
             question_code = command
             user = get_user(telegram_id=telegram_id)
             inline_markup = types.InlineKeyboardMarkup(row_width=2)
-            btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
+            btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="back")
             inline_markup.row(btn1)
             msg = _(send_after_answer, language)
             send_msg = bot.send_message(callback.message.chat.id,
@@ -333,7 +334,7 @@ def handle_call_back(callback):
         if command == "send_comments":
             msg = _(send_comment_msg, language)
             inline_markup = types.InlineKeyboardMarkup(row_width=2)
-            btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
+            btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="back")
             inline_markup.row(btn1)
             send_msg = bot.send_message(callback.message.chat.id, text=msg, reply_markup=inline_markup)
             bot.register_next_step_handler_by_chat_id(
@@ -343,6 +344,10 @@ def handle_call_back(callback):
                 bot.delete_message(callback.message.chat.id, callback.message.message_id)
             except telebot.apihelper.ApiTelegramException as e:
                 logging.error(f"Failed Message delete: chose_result_giver  {callback.message.message_id}: {e}")
+        
+        if command == "back":
+            bot.clear_step_handler_by_chat_id(callback.message.chat.id)
+            start(callback.message)
                 
     else:
         start(callback.message)
@@ -387,7 +392,7 @@ def handle_taker_answer(message, telegram_id, delete_msg, language):
     except telebot.apihelper.ApiTelegramException as e:
         print(f"Failed welcome to delete message {message.message_id}: {e}")
 
-def handle_question_answer(message, telegram_id):
+def handle_question_answer(message, telegram_id, delete_msg):
     user = get_user(telegram_id=telegram_id)
     answer = message.text
     telegram_id = message.from_user.id
@@ -407,6 +412,10 @@ def handle_question_answer(message, telegram_id):
         bot.delete_message(message.chat.id, message.message_id)
     except telebot.apihelper.ApiTelegramException as e:
         print(f"Failed welcome to delete message {message.message_id}: {e}")
+    try:
+        bot.delete_message(message.chat.id, delete_msg)
+    except telebot.apihelper.ApiTelegramException as e:
+        print(f"Failed welcome to delete message {delete_msg}: {e}")
 
 def handle_all_giver_result(message, telegram_id, delete_msg):
     user = get_user(telegram_id=telegram_id)
