@@ -313,14 +313,19 @@ def handle_call_back(callback):
         
         if command == "how_to_work":
             inline_markup = types.InlineKeyboardMarkup(row_width=2)
-            btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
-            inline_markup.row(btn1)
+            btn1 = types.InlineKeyboardButton(_("⚽ For Football", language),
+                                              web_app=types.WebAppInfo(url="https://www.loom.com/share/733a87727d3e42439066080f9c93a788"))
+            btn2 = types.InlineKeyboardButton(_("🧠 For Quiz", language), callback_data="quiz")
+            btn3 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
+            inline_markup.row(btn1, btn2)
+            inline_markup.row(btn3)
             msg = _(how_to_work_msg, language)
             bot.send_message(callback.message.chat.id, msg, reply_markup=inline_markup)
             try:
                 bot.delete_message(callback.message.chat.id, callback.message.message_id)
             except telebot.apihelper.ApiTelegramException as e:
                 logging.error(f"Failed Message delete: how_to_work {callback.message.message_id}: {e}")
+                
     else:
         start(callback.message)
 
