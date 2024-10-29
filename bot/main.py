@@ -27,8 +27,7 @@ def select_language(message):
     btn1 = types.InlineKeyboardButton("English", callback_data="english")
     btn2 = types.InlineKeyboardButton("አማርኛ", callback_data="amharic")
     markup.add(btn1, btn2)
-    with open('./Assets/languages.png', 'rb') as photo:
-        bot.send_photo(message.chat.id, photo, caption="Select your preferred language", reply_markup=markup)
+    bot.send_message(message.chat.id, text=choose_lang, reply_markup=markup)
 
 def delete_message_after_delay(chat_id, message_id, delay_seconds):
     time.sleep(delay_seconds)
