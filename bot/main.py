@@ -114,7 +114,7 @@ def Giver_welcome(message, userId=None):
     btn2 = types.InlineKeyboardButton(_("Result 🧧", language), callback_data="chose_result_giver")
     btn5 = types.InlineKeyboardButton(_("Insert Answer ✏️", language), callback_data="insert_answer")
     btn3 = types.InlineKeyboardButton(_("Settings ⚙️", language), callback_data="settings")
-    btn6 = types.InlineKeyboardButton(_("How to work ⚒️", language), callback_data="how_to_work")
+    btn6 = types.InlineKeyboardButton(_("How to work ⚒️", language), callback_data="how_to_work_giver")
     btn4 = types.InlineKeyboardButton(_("Invite Friends 🤝", language), switch_inline_query="invite")
     inline_markup.row(btn1, btn2)
     inline_markup.row(btn5, btn3)
@@ -137,9 +137,11 @@ def taker_welcome(message, userId=None):
     msg = _(taker_msg, language)
     btn1 = types.InlineKeyboardButton(_("Answer 😎", language), callback_data="answer")
     btn2 = types.InlineKeyboardButton(_("Settings ⚙️", language), callback_data="settings")
+    btn4 = types.InlineKeyboardButton(_("How to work ⚒️", language),
+                                      web_app=types.WebAppInfo(url="https://www.loom.com/share/25b5a8a083b44e488f9a6bb1f1183868"))
     btn3 = types.InlineKeyboardButton(_("Invite Friends 🤝", language), switch_inline_query="invite")
     inline_markup.row(btn1, btn2)
-    inline_markup.row(btn3)
+    inline_markup.row(btn4, btn3)
 
     with open('./Assets/welcome.png', 'rb') as photo:
         bot.send_photo(message.chat.id, photo, caption=msg, reply_markup=inline_markup)
@@ -261,7 +263,8 @@ def handle_call_back(callback):
             inline_markup.row(btn1)
             send_msg = bot.send_message(callback.message.chat.id, msg, reply_markup=inline_markup)
             bot.register_next_step_handler(
-                callback.message, handle_taker_answer, telegram_id=telegram_id, delete_msg=send_msg.message_id)
+                callback.message, handle_taker_answer, telegram_id=telegram_id,
+                delete_msg=send_msg.message_id, language=language)
             try:
                 bot.delete_message(callback.message.chat.id, callback.message.message_id)
             except telebot.apihelper.ApiTelegramException as e:
@@ -311,7 +314,7 @@ def handle_call_back(callback):
             delete_successfull_msg = delete_account_yes(user=user, message=callback.message, bot=bot, userId=telegram_id)
             threading.Thread(target=delete_message_after_delay, args=(callback.message.chat.id, delete_successfull_msg, 4)).start()
         
-        if command == "how_to_work":
+        if command == "how_to_work_giver":
             inline_markup = types.InlineKeyboardMarkup(row_width=2)
             btn1 = types.InlineKeyboardButton(_("⚽ For Football", language),
                                               web_app=types.WebAppInfo(url="https://www.loom.com/share/733a87727d3e42439066080f9c93a788"))
@@ -325,13 +328,12 @@ def handle_call_back(callback):
             try:
                 bot.delete_message(callback.message.chat.id, callback.message.message_id)
             except telebot.apihelper.ApiTelegramException as e:
-                logging.error(f"Failed Message delete: how_to_work {callback.message.message_id}: {e}")
+                logging.error(f"Failed Message delete: how_to_work_giver {callback.message.message_id}: {e}")
                 
     else:
         start(callback.message)
 
-def handle_taker_answer(message, telegram_id, delete_msg):
-    user = get_user(telegram_id=telegram_id)
+def handle_taker_answer(message, telegram_id, delete_msg, language):
     telegram_id = message.from_user.id
     message_text = message.text.strip()
     match = re.match(r"(\d+)\s+(.*)", message_text)
@@ -349,7 +351,7 @@ def handle_taker_answer(message, telegram_id, delete_msg):
     response = create_answer(telegram_id=telegram_id, created_data=data)
     if response is not None:
         if response.get('status') == 201:
-            welcome_msg = f"Answer Received ✅"
+            welcome_msg = _(answer_receive_msg, language)
         elif response.get('status') == 404:
             welcome_msg = f"Answer not Received ❌ \n\n Resone: There is no question code"
         elif response.get('status') == 400:
@@ -359,7 +361,6 @@ def handle_taker_answer(message, telegram_id, delete_msg):
     else:
         welcome_msg = f"Answer not Received ❌ \n\nPlease try again make sure you have entered the correct question code"
     inline_markup = types.InlineKeyboardMarkup(row_width=2)
-    language = user.get('language', None)
     btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="taker_home")
     inline_markup.row(btn1)
     bot.send_message(message.chat.id, text=welcome_msg, reply_markup=inline_markup)
