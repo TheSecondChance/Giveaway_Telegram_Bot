@@ -315,7 +315,8 @@ def handle_call_back(callback):
             inline_markup = types.InlineKeyboardMarkup(row_width=2)
             btn1 = types.InlineKeyboardButton(_("⚽ For Football", language),
                                               web_app=types.WebAppInfo(url="https://www.loom.com/share/733a87727d3e42439066080f9c93a788"))
-            btn2 = types.InlineKeyboardButton(_("🧠 For Quiz", language), callback_data="quiz")
+            btn2 = types.InlineKeyboardButton(_("🧠 For Quiz", language),
+                                              web_app=types.WebAppInfo(url="https://www.loom.com/share/e0b3cfe843c24a9b9bacf129f283b52a"))
             btn3 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
             inline_markup.row(btn1, btn2)
             inline_markup.row(btn3)
