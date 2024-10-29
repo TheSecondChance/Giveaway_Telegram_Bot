@@ -14,8 +14,10 @@ def user_settings(user, message, bot):
     btn2 = types.InlineKeyboardButton(_("🔄 Change Role", language), callback_data="change_role")
     btn3 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
     btn4 = types.InlineKeyboardButton(_("🗑️ Delete Account", language), callback_data="delete_account")
+    btn5 = types.InlineKeyboardButton(_("💬 Send Comments", language), callback_data="send_comments")
     inline_markup.row(btn1, btn2)
-    inline_markup.row(btn4, btn3)
+    inline_markup.row(btn4, btn5)
+    inline_markup.row(btn3)
     bot.send_message(message.chat.id, text=f"{msg}".format(first_name), reply_markup=inline_markup)
 
 def change_language(language, message, bot):

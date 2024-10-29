@@ -111,3 +111,12 @@ how_to_work_msg = "⏳ Please hold on while we update the instructions on how ev
 now_answer_msg = f"Answer Received ✅ \n\nPlease past this code on you question details 👇\n\n {0} "
 
 answer_receive_msg = "✅ Your answer has been received"
+
+send_comment_msg = """💬 We value your feedback! Please share any comments, suggestions, issues, or feature requests about this bot. 
+
+Your message will be sent directly to the developer. 🫡
+
+📝 Feel free to write and send your comments!"""
+
+
+comment_received_msg = "✅ Your comment has been received"

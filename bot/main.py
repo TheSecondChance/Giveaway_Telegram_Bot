@@ -329,6 +329,20 @@ def handle_call_back(callback):
                 bot.delete_message(callback.message.chat.id, callback.message.message_id)
             except telebot.apihelper.ApiTelegramException as e:
                 logging.error(f"Failed Message delete: how_to_work_giver {callback.message.message_id}: {e}")
+        
+        if command == "send_comments":
+            msg = _(send_comment_msg, language)
+            inline_markup = types.InlineKeyboardMarkup(row_width=2)
+            btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
+            inline_markup.row(btn1)
+            send_msg = bot.send_message(callback.message.chat.id, text=msg, reply_markup=inline_markup)
+            bot.register_next_step_handler_by_chat_id(
+                callback.message.chat.id, send_comments_for_me,
+                telegram_id=telegram_id, delete_msg=send_msg.message_id, language=language)
+            try:
+                bot.delete_message(callback.message.chat.id, callback.message.message_id)
+            except telebot.apihelper.ApiTelegramException as e:
+                logging.error(f"Failed Message delete: chose_result_giver  {callback.message.message_id}: {e}")
                 
     else:
         start(callback.message)
@@ -569,6 +583,31 @@ def update_question_answer(message, telegram_id, question_code, delete_msg):
         bot.delete_message(message.chat.id, message.message_id)
     except telebot.apihelper.ApiTelegramException as e:
         print(f"Failed welcome to delete message {message.message_id}: {e}")
+
+def send_comments_for_me(message, telegram_id, delete_msg, language):
+    user = bot.get_chat(telegram_id)
+    first_name = user.first_name
+    click_msg = "New Comment From👉 {0}"
+    comment = message.text
+    inline_for_developer = types.InlineKeyboardMarkup(row_width=2)
+    inline_markup = types.InlineKeyboardMarkup(row_width=2)
+    msg = _(comment_received_msg, language)
+    btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
+    button = types.InlineKeyboardButton(text=f"{click_msg}".format(first_name), url=f"tg://user?id={telegram_id}")
+    inline_for_developer.row(button)
+    inline_markup.row(btn1)
+    bot.send_message(os.getenv('MY_TELEGRAM_ID'), text=comment, reply_markup=inline_for_developer)
+    bot.send_message(telegram_id, text=msg, reply_markup=inline_markup)
+    try:
+        bot.delete_message(message.chat.id, delete_msg)
+    except telebot.apihelper.ApiTelegramException as e:
+        logging.error(f"Failed welcome to delete message {message.message_id}: {e}")
+    try:
+        bot.delete_message(message.chat.id, message.message_id)
+    except telebot.apihelper.ApiTelegramException as e:
+        print(f"Failed welcome to delete message {message.message_id}: {e}")
+
+
 
 # bot.remove_webhook()
 # bot.infinity_polling()
