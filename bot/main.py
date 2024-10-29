@@ -444,6 +444,10 @@ def handle_all_giver_result(message, telegram_id, delete_msg):
         correct_answers = response.get('correct_answers', [])
         if not correct_answers:
             msg = _(no_correct_answer, language)
+            inline_markup = types.InlineKeyboardMarkup(row_width=2)
+            btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
+            inline_markup.row(btn1)
+            bot.send_message(telegram_id, text=msg, reply_markup=inline_markup)
         else:
             inline_markup = types.InlineKeyboardMarkup(row_width=2)
             valid_users = []
@@ -493,6 +497,10 @@ def handle_first_three_result(message, telegram_id, delete_msg):
     first_three_answer = correct_answers[:3]
     if not correct_answers:
         msg = _(no_correct_answer, language)
+        inline_markup = types.InlineKeyboardMarkup(row_width=2)
+        btn1 = types.InlineKeyboardButton(_("Back ⬅️", language), callback_data="home")
+        inline_markup.row(btn1)
+        bot.send_message(telegram_id, text=msg, reply_markup=inline_markup)
     else:
         inline_markup = types.InlineKeyboardMarkup(row_width=2)
         valid_users = []
@@ -511,7 +519,7 @@ def handle_first_three_result(message, telegram_id, delete_msg):
         inline_markup.row(btn1)
         msg = _(winers_msg, language)
         bot.send_message(telegram_id, text=f"{msg}".format(question_code),
-                            reply_markup=inline_markup)
+                        reply_markup=inline_markup)
     try:
         bot.delete_message(message.chat.id, delete_msg)
     except telebot.apihelper.ApiTelegramException as e:
