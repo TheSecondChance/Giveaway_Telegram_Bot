@@ -1,0 +1,615 @@
+openapi: 3.0.3
+info:
+  title: Giveaway Telegram Bot
+  version: 1.0.1
+  description: Giveaway Telegram Bot API Documentation
+paths:
+  /after/:
+    get:
+      operationId: after_retrieve
+      tags:
+      - after
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+          description: ''
+    put:
+      operationId: after_update
+      tags:
+      - after
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuestionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/QuestionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/QuestionRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+          description: ''
+    patch:
+      operationId: after_partial_update
+      tags:
+      - after
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedQuestionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedQuestionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedQuestionRequest'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+          description: ''
+  /answer/:
+    post:
+      operationId: answer_create
+      tags:
+      - answer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnswerRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AnswerRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AnswerRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Answer'
+          description: ''
+  /create-question/:
+    post:
+      operationId: create_question_create
+      tags:
+      - create-question
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuestionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/QuestionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/QuestionRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+          description: ''
+  /create-user/:
+    post:
+      operationId: create_user_create
+      tags:
+      - create-user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /create-user/{id}/:
+    put:
+      operationId: create_user_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - create-user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    patch:
+      operationId: create_user_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - create-user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /result/:
+    get:
+      operationId: result_retrieve
+      tags:
+      - result
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Answer'
+          description: ''
+  /user/:
+    get:
+      operationId: user_retrieve
+      tags:
+      - user
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTelegramId'
+          description: ''
+    put:
+      operationId: user_update
+      tags:
+      - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserTelegramIdRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserTelegramIdRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserTelegramIdRequest'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTelegramId'
+          description: ''
+    patch:
+      operationId: user_partial_update
+      tags:
+      - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserTelegramIdRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserTelegramIdRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserTelegramIdRequest'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTelegramId'
+          description: ''
+    delete:
+      operationId: user_destroy
+      tags:
+      - user
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+components:
+  schemas:
+    Answer:
+      type: object
+      properties:
+        taker:
+          type: integer
+        question_code:
+          type: integer
+        answer_text:
+          type: string
+          nullable: true
+        is_correct:
+          type: boolean
+      required:
+      - question_code
+      - taker
+    AnswerRequest:
+      type: object
+      properties:
+        taker:
+          type: integer
+        question_code:
+          type: integer
+        answer_text:
+          type: string
+          nullable: true
+        is_correct:
+          type: boolean
+      required:
+      - question_code
+      - taker
+    PatchedQuestionRequest:
+      type: object
+      properties:
+        gifter:
+          type: integer
+        answer_format:
+          type: string
+          nullable: true
+        correct_answer:
+          type: string
+          nullable: true
+        question_code:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+    PatchedUserRequest:
+      type: object
+      properties:
+        first_name:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 100
+        last_name:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 100
+        user_name:
+          type: string
+          nullable: true
+          maxLength: 100
+        phone_number:
+          type: string
+          minLength: 1
+        telegram_id:
+          type: integer
+        language:
+          type: string
+          minLength: 1
+          maxLength: 100
+        is_taker:
+          type: boolean
+        is_gifter:
+          type: boolean
+        is_active:
+          type: boolean
+    PatchedUserTelegramIdRequest:
+      type: object
+      properties:
+        first_name:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 100
+        last_name:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 100
+        user_name:
+          type: string
+          nullable: true
+          maxLength: 100
+        phone_number:
+          type: string
+          nullable: true
+          maxLength: 15
+        telegram_id:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+        language:
+          type: string
+          minLength: 1
+          maxLength: 100
+        is_taker:
+          type: boolean
+        is_gifter:
+          type: boolean
+        is_active:
+          type: boolean
+    Question:
+      type: object
+      properties:
+        gifter:
+          type: integer
+        answer_format:
+          type: string
+          nullable: true
+        correct_answer:
+          type: string
+          nullable: true
+        question_code:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+      required:
+      - gifter
+    QuestionRequest:
+      type: object
+      properties:
+        gifter:
+          type: integer
+        answer_format:
+          type: string
+          nullable: true
+        correct_answer:
+          type: string
+          nullable: true
+        question_code:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+      required:
+      - gifter
+    User:
+      type: object
+      properties:
+        first_name:
+          type: string
+          nullable: true
+          maxLength: 100
+        last_name:
+          type: string
+          nullable: true
+          maxLength: 100
+        user_name:
+          type: string
+          nullable: true
+          maxLength: 100
+        phone_number:
+          type: string
+        telegram_id:
+          type: integer
+        language:
+          type: string
+          maxLength: 100
+        is_taker:
+          type: boolean
+        is_gifter:
+          type: boolean
+        is_active:
+          type: boolean
+    UserRequest:
+      type: object
+      properties:
+        first_name:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 100
+        last_name:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 100
+        user_name:
+          type: string
+          nullable: true
+          maxLength: 100
+        phone_number:
+          type: string
+          minLength: 1
+        telegram_id:
+          type: integer
+        language:
+          type: string
+          minLength: 1
+          maxLength: 100
+        is_taker:
+          type: boolean
+        is_gifter:
+          type: boolean
+        is_active:
+          type: boolean
+    UserTelegramId:
+      type: object
+      properties:
+        first_name:
+          type: string
+          nullable: true
+          maxLength: 100
+        last_name:
+          type: string
+          nullable: true
+          maxLength: 100
+        user_name:
+          type: string
+          nullable: true
+          maxLength: 100
+        phone_number:
+          type: string
+          nullable: true
+          maxLength: 15
+        telegram_id:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+        language:
+          type: string
+          maxLength: 100
+        is_taker:
+          type: boolean
+        is_gifter:
+          type: boolean
+        is_active:
+          type: boolean
+    UserTelegramIdRequest:
+      type: object
+      properties:
+        first_name:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 100
+        last_name:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 100
+        user_name:
+          type: string
+          nullable: true
+          maxLength: 100
+        phone_number:
+          type: string
+          nullable: true
+          maxLength: 15
+        telegram_id:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+        language:
+          type: string
+          minLength: 1
+          maxLength: 100
+        is_taker:
+          type: boolean
+        is_gifter:
+          type: boolean
+        is_active:
+          type: boolean
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid

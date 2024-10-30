@@ -51,6 +51,21 @@ else:
 
 ALLOWED_HOSTS = ['127.0.0.1', 'giveaway.get-alpha.tech']
 
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Giveaway Telegram Bot",
+    "DESCRIPTION": "Giveaway Telegram Bot API Documentation",
+    "VERSION": "1.0.1",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SWAGGER_UI_DIST": "SIDECAR",  # shorthand to use the sidecar instead
+    "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
+    "SCHEMA_PATH_PREFIX_TRIM": True,
+    "COMPONENT_SPLIT_REQUEST": True,
+}
+
 
 # Application definition
 
@@ -64,6 +79,7 @@ INSTALLED_APPS = [
     'giveaway',
     'rest_framework',
     'corsheaders',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
